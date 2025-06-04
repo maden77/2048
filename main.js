@@ -109,6 +109,9 @@ function handleKey(e) {
   }
   return true;
 	}
+	if (isGameOver(board)) {
+  alert("Game Over! Tidak ada langkah lagi.");
+	}
 	// Deteksi swipe di layar HP
 let startX, startY;
 
