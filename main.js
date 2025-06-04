@@ -1,61 +1,105 @@
-const boardSize = 4;
-let board = Array(boardSize).fill().map(() => Array(boardSize).fill(null));
-const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31]; // dst
+const board = document.getElementById("game-board");
+let grid = [];
 
-function getNextPrime(value) {
-  let index = primes.indexOf(value);
-  return primes[index + 1] || value;
+function createEmptyBoard() {
+  grid = [];
+  for (let i = 0; i < 4; i++) {
+    grid[i] = [];
+    for (let j = 0; j < 4; j++) {
+      grid[i][j] = 0;
+    }
+  }
+}
+
+function drawBoard() {
+  board.innerHTML = "";
+  for (let i = 0; i < 4; i++) {
+    for (let j = 0; j < 4; j++) {
+      const tile = document.createElement("div");
+      tile.classList.add("tile");
+      tile.textContent = grid[i][j] === 0 ? "" : grid[i][j];
+      board.appendChild(tile);
+    }
+  }
 }
 
 function addRandomTile() {
   let empty = [];
-  for (let r = 0; r < boardSize; r++) {
-    for (let c = 0; c < boardSize; c++) {
-      if (board[r][c] === null) empty.push({ r, c });
+  for (let i = 0; i < 4; i++) {
+    for (let j = 0; j < 4; j++) {
+      if (grid[i][j] === 0) empty.push({ x: i, y: j });
     }
   }
   if (empty.length === 0) return;
 
-  let { r, c } = empty[Math.floor(Math.random() * empty.length)];
-  board[r][c] = 2; // Mulai dari bilangan prima pertama
-  drawBoard();
+  let spot = empty[Math.floor(Math.random() * empty.length)];
+  grid[spot.x][spot.y] = Math.random() < 0.9 ? 2 : 4;
 }
 
-function drawBoard() {
-  const boardDiv = document.getElementById("game-board");
-  boardDiv.innerHTML = "";
-  for (let r = 0; r < boardSize; r++) {
-    for (let c = 0; c < boardSize; c++) {
-      let tile = document.createElement("div");
-      tile.className = "tile";
-      tile.textContent = board[r][c] || "";
-      boardDiv.appendChild(tile);
+function slide(row) {
+  let arr = row.filter(val => val);
+  for (let i = 0; i < arr.length - 1; i++) {
+    if (arr[i] === arr[i + 1]) {
+      arr[i] *= 2;
+      arr[i + 1] = 0;
     }
   }
+  return [...arr.filter(val => val), ...Array(4 - arr.filter(val => val).length).fill(0)];
+}
+
+function rotateGrid() {
+  let newGrid = [];
+  for (let i = 0; i < 4; i++) {
+    newGrid[i] = [];
+    for (let j = 0; j < 4; j++) {
+      newGrid[i][j] = grid[j][3 - i];
+    }
+  }
+  grid = newGrid;
 }
 
 function moveLeft() {
-  for (let r = 0; r < boardSize; r++) {
-    let row = board[r].filter(v => v !== null);
-    for (let i = 0; i < row.length - 1; i++) {
-      if (row[i] === row[i + 1]) {
-        row[i] = getNextPrime(row[i]);
-        row[i + 1] = null;
-      }
-    }
-    row = row.filter(v => v !== null);
-    while (row.length < boardSize) row.push(null);
-    board[r] = row;
+  for (let i = 0; i < 4; i++) {
+    grid[i] = slide(grid[i]);
   }
-  addRandomTile();
 }
 
-document.addEventListener("keydown", e => {
-  if (e.key === "ArrowLeft") moveLeft();
-  // Tambah moveRight, moveUp, moveDown jika perlu
-  drawBoard();
-});
+function moveRight() {
+  for (let i = 0; i < 4; i++) {
+    grid[i] = slide(grid[i].reverse()).reverse();
+  }
+}
 
+function moveUp() {
+  rotateGrid();
+  moveLeft();
+  rotateGrid();
+  rotateGrid();
+  rotateGrid();
+}
+
+function moveDown() {
+  rotateGrid();
+  moveRight();
+  rotateGrid();
+  rotateGrid();
+  rotateGrid();
+}
+
+function handleKey(e) {
+  switch (e.key) {
+    case "ArrowLeft": moveLeft(); break;
+    case "ArrowRight": moveRight(); break;
+    case "ArrowUp": moveUp(); break;
+    case "ArrowDown": moveDown(); break;
+  }
+  addRandomTile();
+  drawBoard();
+}
+
+document.addEventListener("keydown", handleKey);
+
+createEmptyBoard();
 addRandomTile();
 addRandomTile();
 drawBoard();
