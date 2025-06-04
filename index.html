@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>2048 Bilangan Prima</title>
   <style>
     html, body {
       height: 100%;
       margin: 0;
-      overflow: hidden;      /* Mencegah scroll yang memicu refresh */
-      touch-action: none;    /* Mencegah swipe bawaan browser */
+      overflow: hidden;
+      touch-action: none;
     }
 
     body {
@@ -38,7 +38,21 @@
       font-size: 24px;
       font-weight: bold;
       border-radius: 8px;
+      transition: background 0.2s, transform 0.2s;
     }
+
+    /* Warna berdasarkan nilai */
+    .tile-2    { background: #eee4da; color: #776e65; }
+    .tile-4    { background: #ede0c8; color: #776e65; }
+    .tile-8    { background: #f2b179; color: #f9f6f2; }
+    .tile-16   { background: #f59563; color: #f9f6f2; }
+    .tile-32   { background: #f67c5f; color: #f9f6f2; }
+    .tile-64   { background: #f65e3b; color: #f9f6f2; }
+    .tile-128  { background: #edcf72; color: #f9f6f2; font-size: 20px; }
+    .tile-256  { background: #edcc61; color: #f9f6f2; font-size: 20px; }
+    .tile-512  { background: #edc850; color: #f9f6f2; font-size: 20px; }
+    .tile-1024 { background: #edc53f; color: #f9f6f2; font-size: 18px; }
+    .tile-2048 { background: #edc22e; color: #f9f6f2; font-size: 18px; }
   </style>
 </head>
 <body>
@@ -65,7 +79,11 @@
         for (let j = 0; j < 4; j++) {
           const tile = document.createElement("div");
           tile.classList.add("tile");
-          tile.textContent = grid[i][j] === 0 ? "" : grid[i][j];
+          const val = grid[i][j];
+          if (val !== 0) {
+            tile.textContent = val;
+            tile.classList.add("tile-" + val);
+          }
           board.appendChild(tile);
         }
       }
@@ -93,9 +111,7 @@
         }
       }
       arr = arr.filter(val => val !== 0);
-      while (arr.length < 4) {
-        arr.push(0);
-      }
+      while (arr.length < 4) arr.push(0);
       return arr;
     }
 
@@ -156,7 +172,7 @@
 
     function handleKey(e) {
       if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) {
-        e.preventDefault(); // Cegah scroll/refresh
+        e.preventDefault();
       }
 
       const oldGrid = copyGrid(grid);
@@ -179,7 +195,6 @@
 
     document.addEventListener("keydown", handleKey);
 
-    // Swipe support untuk layar sentuh
     let startX, startY;
     document.addEventListener("touchstart", function(e) {
       startX = e.touches[0].clientX;
