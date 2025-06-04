@@ -73,17 +73,25 @@ function moveRight() {
 function moveUp() {
   rotateGrid();
   moveLeft();
-  rotateGrid();
-  rotateGrid();
-  rotateGrid();
+  rotateGrid(); rotateGrid(); rotateGrid();
 }
 
 function moveDown() {
   rotateGrid();
   moveRight();
-  rotateGrid();
-  rotateGrid();
-  rotateGrid();
+  rotateGrid(); rotateGrid(); rotateGrid();
+}
+
+function isGameOver(g) {
+  for (let y = 0; y < 4; y++) {
+    for (let x = 0; x < 4; x++) {
+      const current = g[y][x];
+      if (current === 0) return false;
+      if (x < 3 && current === g[y][x + 1]) return false;
+      if (y < 3 && current === g[y + 1][x]) return false;
+    }
+  }
+  return true;
 }
 
 function handleKey(e) {
@@ -92,27 +100,16 @@ function handleKey(e) {
     case "ArrowRight": moveRight(); break;
     case "ArrowUp": moveUp(); break;
     case "ArrowDown": moveDown(); break;
+    default: return;
   }
   addRandomTile();
   drawBoard();
-	function isGameOver(board) {
-  for (let y = 0; y < 4; y++) {
-    for (let x = 0; x < 4; x++) {
-      const current = board[y][x];
-      if (current === 0) return false;
-
-      // Cek kanan
-      if (x < 3 && current === board[y][x + 1]) return false;
-      // Cek bawah
-      if (y < 3 && current === board[y + 1][x]) return false;
-    }
+  if (isGameOver(grid)) {
+    alert("Game Over! Tidak ada langkah lagi.");
   }
-  return true;
-	}
-	if (isGameOver(board)) {
-  alert("Game Over! Tidak ada langkah lagi.");
-	}
-	// Deteksi swipe di layar HP
+}
+
+// ➕ Swipe Support
 let startX, startY;
 
 document.addEventListener("touchstart", function(e) {
@@ -128,32 +125,23 @@ document.addEventListener("touchend", function(e) {
   const dy = endY - startY;
 
   if (Math.abs(dx) > Math.abs(dy)) {
-    // Gerakan horizontal
-    if (dx > 30) {
-      moveRight();
-    } else if (dx < -30) {
-      moveLeft();
-    }
+    if (dx > 30) moveRight();
+    else if (dx < -30) moveLeft();
   } else {
-    // Gerakan vertikal
-    if (dy > 30) {
-      moveDown();
-    } else if (dy < -30) {
-      moveUp();
-    }
+    if (dy > 30) moveDown();
+    else if (dy < -30) moveUp();
   }
 
   addRandomTile();
   drawBoard();
-});
-}
-document.addEventListener("keydown", function(e) {
-  console.log("Tombol ditekan:", e.key);
-  // Tambahkan logika untuk menangani pergerakan ubin di sini
+  if (isGameOver(grid)) {
+    alert("Game Over! Tidak ada langkah lagi.");
+  }
 });
 
 document.addEventListener("keydown", handleKey);
 
+// Mulai game
 createEmptyBoard();
 addRandomTile();
 addRandomTile();
