@@ -96,6 +96,10 @@ function handleKey(e) {
   addRandomTile();
   drawBoard();
 }
+document.addEventListener("keydown", function(e) {
+  console.log("Tombol ditekan:", e.key);
+  // Tambahkan logika untuk menangani pergerakan ubin di sini
+});
 
 document.addEventListener("keydown", handleKey);
 
