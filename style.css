@@ -1,25 +1,30 @@
 body {
-  font-family: sans-serif;
+  font-family: Arial, sans-serif;
   text-align: center;
   background: #faf8ef;
+  color: #776e65;
 }
 
 #game-board {
+  width: 400px;
+  height: 400px;
+  margin: auto;
   display: grid;
-  grid-template-columns: repeat(4, 80px);
+  grid-template-columns: repeat(4, 1fr);
   grid-gap: 10px;
-  justify-content: center;
-  margin-top: 20px;
+  background: #bbada0;
+  padding: 10px;
+  border-radius: 10px;
 }
 
 .tile {
-  width: 80px;
-  height: 80px;
+  width: 90px;
+  height: 90px;
   background: #cdc1b4;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 20px;
+  font-size: 24px;
   font-weight: bold;
-  color: #333;
+  border-radius: 5px;
 }
