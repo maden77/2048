@@ -28,3 +28,15 @@ body {
   font-weight: bold;
   border-radius: 5px;
 }
+ body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  touch-action: none;
+}
+
+body {
+  font-family: sans-serif;
+  text-align: center;
+  background: #f8f8f8;
+}
