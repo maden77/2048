@@ -95,6 +95,20 @@ function handleKey(e) {
   }
   addRandomTile();
   drawBoard();
+	function isGameOver(board) {
+  for (let y = 0; y < 4; y++) {
+    for (let x = 0; x < 4; x++) {
+      const current = board[y][x];
+      if (current === 0) return false;
+
+      // Cek kanan
+      if (x < 3 && current === board[y][x + 1]) return false;
+      // Cek bawah
+      if (y < 3 && current === board[y + 1][x]) return false;
+    }
+  }
+  return true;
+	}
 	// Deteksi swipe di layar HP
 let startX, startY;
 
