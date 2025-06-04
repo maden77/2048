@@ -95,6 +95,40 @@ function handleKey(e) {
   }
   addRandomTile();
   drawBoard();
+	// Deteksi swipe di layar HP
+let startX, startY;
+
+document.addEventListener("touchstart", function(e) {
+  startX = e.touches[0].clientX;
+  startY = e.touches[0].clientY;
+});
+
+document.addEventListener("touchend", function(e) {
+  const endX = e.changedTouches[0].clientX;
+  const endY = e.changedTouches[0].clientY;
+
+  const dx = endX - startX;
+  const dy = endY - startY;
+
+  if (Math.abs(dx) > Math.abs(dy)) {
+    // Gerakan horizontal
+    if (dx > 30) {
+      moveRight();
+    } else if (dx < -30) {
+      moveLeft();
+    }
+  } else {
+    // Gerakan vertikal
+    if (dy > 30) {
+      moveDown();
+    } else if (dy < -30) {
+      moveUp();
+    }
+  }
+
+  addRandomTile();
+  drawBoard();
+});
 }
 document.addEventListener("keydown", function(e) {
   console.log("Tombol ditekan:", e.key);
