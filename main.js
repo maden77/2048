@@ -152,6 +152,10 @@ document.addEventListener("touchend", function(e) {
     alert("Game Over! Tidak ada langkah lagi.");
   }
 });
+// Blokir gestur scroll & pull-to-refresh di mobile
+document.addEventListener("touchmove", function(e) {
+  e.preventDefault();
+}, { passive: false });
 
 document.addEventListener("keydown", handleKey);
 
