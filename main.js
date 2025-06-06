@@ -1,4 +1,8 @@
 const board = document.getElementById("game-board");
+const mergeSound = new Audio("merge.wav");
+const winSound = new Audio("win.wav");
+let hasPlayedWinSound = false;
+let score = 0;
 let grid = [];
 
 function createEmptyBoard() {
@@ -21,6 +25,7 @@ function drawBoard() {
       board.appendChild(tile);
     }
   }
+  document.getElementById("score").textContent = "Score: " + score;
 }
 
 function addRandomTile() {
@@ -42,6 +47,15 @@ function slide(row) {
     if (arr[i] === arr[i + 1]) {
       arr[i] *= 2;
       arr[i + 1] = 0;
+
+      mergeSound.play();
+
+      if (arr[i] === 2048 && !hasPlayedWinSound) {
+        winSound.play();
+        hasPlayedWinSound = true;
+      }
+
+      score += arr[i];
     }
   }
   return [...arr.filter(val => val), ...Array(4 - arr.filter(val => val).length).fill(0)];
