@@ -7,6 +7,11 @@ const urlsToCache = [
   "/manifest.json",
   "/icon-192.png",
   "/icon-512.png"
+  "/geser.wav',
+  "/gabung.wav',
+  "/menang.wav',
+  "/kalah.wav',
+
 ];
 
 self.addEventListener("install", function(event) {
