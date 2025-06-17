@@ -1,8 +1,8 @@
 const board = document.getElementById("game-board");
-const suaraGeser = new Audio("/geser.wav");
-const suaraGabung = new Audio("/gabung.wav");
-const suaraMenang = new Audio("/menang.wav");
-const suaraKalah = new Audio("/kalah.wav");
+const suaraGeser = new Audio("geser.wav");
+const suaraGabung = new Audio("gabung.wav");
+const suaraMenang = new Audio("menang.wav");
+const suaraKalah = new Audio("kalah.wav");
 let hasPlayedWinSound = false;
 
 let score = 0;
