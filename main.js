@@ -1,5 +1,4 @@
 const board = document.getElementById("game-board");
-const mergeSound = new Audio("merge.wav");
 const suaraGeser = new Audio("2048_audio/geser.wav");
 const suaraGabung = new Audio("2048_audio/gabung.wav");
 const suaraMenang = new Audio("2048_audio/menang.wav");
