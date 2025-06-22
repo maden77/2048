@@ -28,6 +28,11 @@ body {
   font-weight: bold;
   border-radius: 5px;
 }
+body {
+  overscroll-behavior-y: none;
+  height: 100%;
+  overflow: hidden;
+}
  body {
   height: 100%;
   margin: 0;
