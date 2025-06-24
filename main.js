@@ -1,10 +1,56 @@
-const board = document.getElementById("game-board");
-const suaraGeser = new Audio("geser.wav");
-const suaraGabung = new Audio("gabung.wav");
-const suaraMenang = new Audio("menang.wav");
-const suaraKalah = new Audio("kalah.wav");
-let hasPlayedWinSound = false;
+// Inisialisasi AudioContext
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+const sounds = {};
 
+// Load semua suara
+async function loadSounds() {
+  const soundFiles = [
+    { name: "slide", url: "sounds/slide.wav" },
+    { name: "merge", url: "sounds/merge.wav" },
+    { name: "win", url: "sounds/win.wav" },
+    { name: "lose", url: "sounds/lose.wav" }
+  ];
+
+  for (const sound of soundFiles) {
+    const response = await fetch(sound.url);
+    const buffer = await response.arrayBuffer();
+    sounds[sound.name] = await audioContext.decodeAudioData(buffer);
+  }
+}
+
+// Mainkan suara
+function playSound(name) {
+  const source = audioContext.createBufferSource();
+  source.buffer = sounds[name];
+  source.connect(audioContext.destination);
+  source.start(0);
+}
+
+// Jalankan setelah halaman dimuat
+window.addEventListener("load", () => {
+  loadSounds().then(() => {
+    console.log("Semua suara siap!");
+  });
+});
+// Saat tile bergeser
+function onTileSlide() {
+  playSound("slide"); // atau playSound("slideSound") untuk metode HTML5
+}
+
+// Saat tile gabung
+function onTileMerge() {
+  playSound("merge");
+}
+
+// Saat menang
+function onWin() {
+  playSound("win");
+}
+
+// Saat kalah
+function onLose() {
+  playSound("lose");
+}
 let score = 0;
 let grid = [];
 
@@ -125,6 +171,11 @@ function handleKey(e) {
     alert("Game Over! Tidak ada langkah lagi.");
   }
 }
+// Web Audio API
+const gainNode = audioContext.createGain();
+gainNode.gain.value = 0.6; // 60% volume
+source.connect(gainNode);
+gainNode.connect(audioContext.destination);
 
 // ➕ Swipe Support
 let startX, startY;
