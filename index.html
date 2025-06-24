@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2048-maden</title>
+    <title>2048 Premium - Fixed Version</title>
     <style>
         :root {
             --tile-bg: #eee4da;
@@ -171,7 +171,7 @@
             bottom: 0;
             background: rgba(238, 228, 218, 0.73);
             z-index: 100;
-            display: flex;
+            display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -227,7 +227,7 @@
     
     <div class="grid-container">
         <div class="grid" id="grid"></div>
-        <div class="game-over" id="game-over" style="display: none;">
+        <div class="game-over" id="game-over">
             <div class="game-over-text" id="game-over-text">Game Over!</div>
             <button id="try-again-btn">Try Again</button>
         </div>
@@ -245,7 +245,7 @@
         let score = 0;
         let bestScore = localStorage.getItem('bestScore') || 0;
         let isMuted = false;
-        let isGameOver = false;
+        let gameOver = false;
         
         // DOM Elements
         const gridElement = document.getElementById('grid');
@@ -285,7 +285,7 @@
             
             // Reset score and game state
             score = 0;
-            isGameOver = false;
+            gameOver = false;
             updateScore();
             gameOverElement.style.display = 'none';
             
@@ -326,7 +326,10 @@
                     tile.style.top = `${row * 115 + 15}px`;
                     tile.style.left = `${col * 115 + 15}px`;
                 }, 10);
+                
+                return true;
             }
+            return false;
         }
         
         // Update the score display
@@ -371,93 +374,105 @@
         
         // Move tiles in a direction
         function moveTiles(direction) {
-            if (isGameOver) return false;
+            if (gameOver) return false;
             
             let moved = false;
             const oldGrid = JSON.parse(JSON.stringify(grid));
             
-            // Rotate grid based on direction to simplify movement logic
-            if (direction === 'up' || direction === 'down') {
-                grid = transpose(grid);
-            }
-            if (direction === 'right' || direction === 'down') {
-                grid = grid.map(row => row.reverse());
-            }
-            
-            // Process movement to the left
-            for (let row = 0; row < 4; row++) {
-                // Remove zeros
-                let newRow = grid[row].filter(val => val !== 0);
-                
-                // Merge tiles
-                for (let i = 0; i < newRow.length - 1; i++) {
-                    if (newRow[i] === newRow[i + 1]) {
-                        newRow[i] *= 2;
-                        newRow[i + 1] = 0;
-                        score += newRow[i];
-                        playSound(mergeSound);
-                        
-                        // Special effects for high-value merges
-                        if (newRow[i] >= 256) {
-                            playSound(powerupSound);
+            // Process movement based on direction
+            switch (direction) {
+                case 'up':
+                    for (let col = 0; col < 4; col++) {
+                        let column = [grid[0][col], grid[1][col], grid[2][col], grid[3][col]];
+                        let result = processLine(column);
+                        for (let row = 0; row < 4; row++) {
+                            grid[row][col] = result[row];
+                        }
+                        if (JSON.stringify(column) !== JSON.stringify(result)) {
+                            moved = true;
                         }
                     }
-                }
-                
-                // Remove new zeros after merging
-                newRow = newRow.filter(val => val !== 0);
-                
-                // Add zeros to the end
-                while (newRow.length < 4) {
-                    newRow.push(0);
-                }
-                
-                // Check if row changed
-                if (JSON.stringify(grid[row]) !== JSON.stringify(newRow)) {
-                    moved = true;
-                }
-                
-                grid[row] = newRow;
-            }
-            
-            // Undo rotation
-            if (direction === 'right' || direction === 'down') {
-                grid = grid.map(row => row.reverse());
-            }
-            if (direction === 'up' || direction === 'down') {
-                grid = transpose(grid);
+                    break;
+                    
+                case 'down':
+                    for (let col = 0; col < 4; col++) {
+                        let column = [grid[3][col], grid[2][col], grid[1][col], grid[0][col]];
+                        let result = processLine(column);
+                        result = result.reverse();
+                        for (let row = 0; row < 4; row++) {
+                            grid[row][col] = result[row];
+                        }
+                        if (JSON.stringify([grid[3][col], grid[2][col], grid[1][col], grid[0][col]]) !== JSON.stringify(result.reverse())) {
+                            moved = true;
+                        }
+                    }
+                    break;
+                    
+                case 'left':
+                    for (let row = 0; row < 4; row++) {
+                        let oldRow = [...grid[row]];
+                        grid[row] = processLine(grid[row]);
+                        if (JSON.stringify(oldRow) !== JSON.stringify(grid[row])) {
+                            moved = true;
+                        }
+                    }
+                    break;
+                    
+                case 'right':
+                    for (let row = 0; row < 4; row++) {
+                        let reversed = [...grid[row]].reverse();
+                        let processed = processLine(reversed).reverse();
+                        if (JSON.stringify(grid[row]) !== JSON.stringify(processed)) {
+                            moved = true;
+                        }
+                        grid[row] = processed;
+                    }
+                    break;
             }
             
             if (moved) {
                 playSound(moveSound);
-                
-                // Update all tiles
                 updateTiles();
                 
-                // Add new random tile
                 setTimeout(() => {
                     addRandomTile();
+                    updateTiles();
                     
-                    // Check game over after animation
-                    setTimeout(() => {
-                        if (isGameOver()) {
-                            showGameOver(false);
-                        } else {
-                            // Check for win condition
-                            for (let row = 0; row < 4; row++) {
-                                for (let col = 0; col < 4; col++) {
-                                    if (grid[row][col] === 2048) {
-                                        showGameOver(true);
-                                        return;
-                                    }
-                                }
-                            }
-                        }
-                    }, 100);
+                    if (checkGameOver()) {
+                        showGameOver(false);
+                    } else {
+                        checkWin();
+                    }
                 }, 100);
             }
             
             return moved;
+        }
+        
+        // Process a single line (row or column)
+        function processLine(line) {
+            let filtered = line.filter(val => val !== 0);
+            
+            // Merge tiles
+            for (let i = 0; i < filtered.length - 1; i++) {
+                if (filtered[i] === filtered[i + 1]) {
+                    filtered[i] *= 2;
+                    filtered[i + 1] = 0;
+                    score += filtered[i];
+                    playSound(mergeSound);
+                    
+                    if (filtered[i] >= 256) {
+                        playSound(powerupSound);
+                    }
+                }
+            }
+            
+            filtered = filtered.filter(val => val !== 0);
+            while (filtered.length < 4) {
+                filtered.push(0);
+            }
+            
+            return filtered;
         }
         
         // Update all tiles after movement
@@ -485,14 +500,9 @@
             updateScore();
         }
         
-        // Transpose matrix (helper function)
-        function transpose(matrix) {
-            return matrix[0].map((_, colIndex) => matrix.map(row => row[colIndex]));
-        }
-        
         // Check if game is over
-        function isGameOver() {
-            // Check for empty cells
+        function checkGameOver() {
+            // Check for empty cells first
             for (let row = 0; row < 4; row++) {
                 for (let col = 0; col < 4; col++) {
                     if (grid[row][col] === 0) {
@@ -521,9 +531,22 @@
             return true;
         }
         
+        // Check for win condition
+        function checkWin() {
+            for (let row = 0; row < 4; row++) {
+                for (let col = 0; col < 4; col++) {
+                    if (grid[row][col] === 2048) {
+                        showGameOver(true);
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        
         // Show game over screen
         function showGameOver(isWin) {
-            isGameOver = true;
+            gameOver = true;
             
             if (isWin) {
                 gameOverTextElement.textContent = 'You Win!';
@@ -550,26 +573,61 @@
         document.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowUp') {
                 moveTiles('up');
+                e.preventDefault();
             } else if (e.key === 'ArrowRight') {
                 moveTiles('right');
+                e.preventDefault();
             } else if (e.key === 'ArrowDown') {
                 moveTiles('down');
+                e.preventDefault();
             } else if (e.key === 'ArrowLeft') {
                 moveTiles('left');
+                e.preventDefault();
             }
         });
         
-        // Swipe controls for mobile
-        let touchStartX, touchStartY, touchEndX, touchEndY;
+        // Touch controls for mobile
+        let touchStartX, touchStartY;
         
         document.addEventListener('touchstart', (e) => {
-            touchStartX = e.changedTouches[0].screenX;
-            touchStartY = e.changedTouches[0].screenY;
-        }, false);
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, { passive: false });
+        
+        document.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        }, { passive: false });
         
         document.addEventListener('touchend', (e) => {
-            touchEndX = e.changedTouches[0].screenX;
-            touchEndY = e.changedTouches[0].screenY;
-            handleSwipe();
-        }, false);
-      
+            if (!touchStartX || !touchStartY) return;
+            
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            
+            const dx = touchEndX - touchStartX;
+            const dy = touchEndY - touchStartY;
+            
+            // Determine primary direction
+            if (Math.abs(dx) > Math.abs(dy)) {
+                if (dx > 50) {
+                    moveTiles('right');
+                } else if (dx < -50) {
+                    moveTiles('left');
+                }
+            } else {
+                if (dy > 50) {
+                    moveTiles('down');
+                } else if (dy < -50) {
+                    moveTiles('up');
+                }
+            }
+            
+            touchStartX = null;
+            touchStartY = null;
+        }, { passive: false });
+        
+        // Initialize the game
+        initGame();
+    </script>
+</body>
+</html>
