@@ -11,6 +11,7 @@
             text-align: center;
             margin: 0;
             padding: 20px;
+            touch-action: none;
         }
         
         .header {
@@ -117,6 +118,26 @@
         .tile-512 { background: #edc850; color: white; font-size: 40px; }
         .tile-1024 { background: #edc53f; color: white; font-size: 35px; }
         .tile-2048 { background: #edc22e; color: white; font-size: 35px; }
+        
+        .game-over {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(238, 228, 218, 0.9);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        
+        .game-over h2 {
+            font-size: 60px;
+            color: #776e65;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
@@ -136,11 +157,15 @@
     
     <div class="controls">
         <button id="new-game-btn">New Game</button>
-        <button id="mute-btn">Sound</button>
     </div>
     
     <div class="grid-container">
         <div class="grid" id="grid"></div>
+    </div>
+    
+    <div class="game-over" id="game-over">
+        <h2 id="game-over-text">Game Over!</h2>
+        <button id="try-again-btn">Try Again</button>
     </div>
     
     <script>
@@ -148,12 +173,16 @@
         let grid = [];
         let score = 0;
         let bestScore = localStorage.getItem('bestScore') || 0;
+        let gameActive = true;
         
         // DOM Elements
         const gridElement = document.getElementById('grid');
         const scoreElement = document.getElementById('score');
         const bestElement = document.getElementById('best');
         const newGameBtn = document.getElementById('new-game-btn');
+        const tryAgainBtn = document.getElementById('try-again-btn');
+        const gameOverElement = document.getElementById('game-over');
+        const gameOverTextElement = document.getElementById('game-over-text');
         
         // Initialize Game
         function initGame() {
@@ -174,9 +203,11 @@
                 }
             }
             
-            // Reset score
+            // Reset score and state
             score = 0;
+            gameActive = true;
             updateScore();
+            gameOverElement.style.display = 'none';
             
             // Add initial tiles
             addRandomTile();
@@ -226,7 +257,10 @@
         
         // Move tiles in a direction
         function moveTiles(direction) {
+            if (!gameActive) return false;
+            
             let moved = false;
+            const oldGrid = JSON.parse(JSON.stringify(grid));
             
             // Process movement based on direction
             switch (direction) {
@@ -284,8 +318,14 @@
                 setTimeout(() => {
                     addRandomTile();
                     updateTiles();
+                    
+                    if (isGameOver()) {
+                        showGameOver();
+                    }
                 }, 100);
             }
+            
+            return moved;
         }
         
         // Process a single line (row or column)
@@ -334,25 +374,103 @@
             updateScore();
         }
         
+        // Check if game is over
+        function isGameOver() {
+            // Check for empty cells first
+            for (let row = 0; row < 4; row++) {
+                for (let col = 0; col < 4; col++) {
+                    if (grid[row][col] === 0) {
+                        return false;
+                    }
+                }
+            }
+            
+            // Check for possible merges
+            for (let row = 0; row < 4; row++) {
+                for (let col = 0; col < 4; col++) {
+                    const value = grid[row][col];
+                    
+                    // Check right neighbor
+                    if (col < 3 && grid[row][col + 1] === value) {
+                        return false;
+                    }
+                    
+                    // Check bottom neighbor
+                    if (row < 3 && grid[row + 1][col] === value) {
+                        return false;
+                    }
+                }
+            }
+            
+            return true;
+        }
+        
+        // Check for win condition
+        function checkWin() {
+            for (let row = 0; row < 4; row++) {
+                for (let col = 0; col < 4; col++) {
+                    if (grid[row][col] === 2048) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        
+        // Show game over screen
+        function showGameOver() {
+            gameActive = false;
+            
+            if (checkWin()) {
+                gameOverTextElement.textContent = 'You Win!';
+            } else {
+                gameOverTextElement.textContent = 'Game Over!';
+            }
+            
+            gameOverElement.style.display = 'flex';
+        }
+        
         // Event Listeners
         newGameBtn.addEventListener('click', initGame);
+        tryAgainBtn.addEventListener('click', initGame);
         
         // Keyboard controls
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowUp') {
-                moveTiles('up');
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
                 e.preventDefault();
-            } else if (e.key === 'ArrowRight') {
-                moveTiles('right');
-                e.preventDefault();
-            } else if (e.key === 'ArrowDown') {
-                moveTiles('down');
-                e.preventDefault();
-            } else if (e.key === 'ArrowLeft') {
-                moveTiles('left');
-                e.preventDefault();
+                moveTiles(e.key.replace('Arrow', '').toLowerCase());
             }
         });
+        
+        // Touch controls for mobile
+        let touchStartX, touchStartY;
+        
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+        
+        document.addEventListener('touchend', (e) => {
+            if (!touchStartX || !touchStartY) return;
+            
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            
+            const dx = touchEndX - touchStartX;
+            const dy = touchEndY - touchStartY;
+            
+            // Determine primary direction
+            if (Math.abs(dx) > Math.abs(dy)) {
+                if (dx > 50) moveTiles('right');
+                else if (dx < -50) moveTiles('left');
+            } else {
+                if (dy > 50) moveTiles('down');
+                else if (dy < -50) moveTiles('up');
+            }
+            
+            touchStartX = null;
+            touchStartY = null;
+        }, { passive: true });
         
         // Initialize the game
         initGame();
