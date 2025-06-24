@@ -3,29 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2048 Premium - Fixed Version</title>
+    <title>2048 Fixed Version</title>
     <style>
-        :root {
-            --tile-bg: #eee4da;
-            --grid-bg: #bbada0;
-            --text-dark: #776e65;
-            --text-light: #f9f6f2;
-        }
-        
         body {
-            font-family: 'Arial Rounded MT Bold', 'Segoe UI', sans-serif;
+            font-family: Arial, sans-serif;
             background: #faf8ef;
-            color: var(--text-dark);
             text-align: center;
             margin: 0;
             padding: 20px;
-            user-select: none;
         }
         
         .header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
             max-width: 500px;
             margin: 0 auto 20px;
         }
@@ -33,11 +23,7 @@
         h1 {
             font-size: 60px;
             margin: 0;
-            background: linear-gradient(45deg, #ff5e00, #ff0080);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            color: #776e65;
         }
         
         .scores {
@@ -51,7 +37,7 @@
             padding: 10px 15px;
             border-radius: 5px;
             font-weight: bold;
-            position: relative;
+            text-align: center;
             min-width: 60px;
         }
         
@@ -65,9 +51,6 @@
         }
         
         .controls {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
             margin-bottom: 20px;
         }
         
@@ -79,27 +62,19 @@
             padding: 10px 15px;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        button:hover {
-            background: #9f8b77;
-            transform: scale(1.05);
+            margin: 0 5px;
         }
         
         .grid-container {
-            background: var(--grid-bg);
+            background: #bbada0;
             border-radius: 6px;
             padding: 15px;
             display: inline-block;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            position: relative;
-            overflow: hidden;
         }
         
         .grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(4, 100px);
             grid-gap: 15px;
             position: relative;
         }
@@ -114,8 +89,7 @@
             align-items: center;
             font-size: 45px;
             font-weight: bold;
-            color: var(--text-dark);
-            transition: all 0.1s;
+            color: #776e65;
         }
         
         .tile {
@@ -128,16 +102,8 @@
             font-size: 45px;
             font-weight: bold;
             border-radius: 5px;
-            background: var(--tile-bg);
-            z-index: 10;
-            animation: appear 0.2s;
+            background: #eee4da;
             transition: all 0.1s;
-        }
-        
-        @keyframes appear {
-            0% { transform: scale(0); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
         }
         
         .tile-2 { background: #eee4da; }
@@ -147,62 +113,10 @@
         .tile-32 { background: #f67c5f; color: white; }
         .tile-64 { background: #f65e3b; color: white; }
         .tile-128 { background: #edcf72; color: white; font-size: 40px; }
-        .tile-256 { background: #edcc61; color: white; font-size: 40px; box-shadow: 0 0 10px rgba(237, 204, 97, 0.5); }
-        .tile-512 { background: #edc850; color: white; font-size: 40px; box-shadow: 0 0 10px rgba(237, 200, 80, 0.5); }
-        .tile-1024 { background: #edc53f; color: white; font-size: 35px; box-shadow: 0 0 10px rgba(237, 197, 63, 0.5); }
-        .tile-2048 { 
-            background: linear-gradient(45deg, #ff5e00, #ff0080);
-            color: white; 
-            font-size: 35px; 
-            box-shadow: 0 0 20px rgba(255, 94, 0, 0.5);
-            animation: pulse 1s infinite alternate;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.05); }
-        }
-        
-        .game-over {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(238, 228, 218, 0.73);
-            z-index: 100;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border-radius: 6px;
-        }
-        
-        .game-over-text {
-            font-size: 60px;
-            font-weight: bold;
-            color: #776e65;
-            margin-bottom: 30px;
-        }
-        
-        .confetti {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background: #f00;
-            border-radius: 50%;
-            animation: fall 5s linear forwards;
-        }
-        
-        @keyframes fall {
-            to { transform: translateY(100vh) rotate(720deg); }
-        }
-        
-        @media (max-width: 520px) {
-            .cell, .tile { width: 70px; height: 70px; font-size: 35px; }
-            .tile-128, .tile-256, .tile-512 { font-size: 30px; }
-            .tile-1024, .tile-2048 { font-size: 25px; }
-        }
+        .tile-256 { background: #edcc61; color: white; font-size: 40px; }
+        .tile-512 { background: #edc850; color: white; font-size: 40px; }
+        .tile-1024 { background: #edc53f; color: white; font-size: 35px; }
+        .tile-2048 { background: #edc22e; color: white; font-size: 35px; }
     </style>
 </head>
 <body>
@@ -222,47 +136,24 @@
     
     <div class="controls">
         <button id="new-game-btn">New Game</button>
-        <button id="mute-btn">🔊 Sound</button>
+        <button id="mute-btn">Sound</button>
     </div>
     
     <div class="grid-container">
         <div class="grid" id="grid"></div>
-        <div class="game-over" id="game-over">
-            <div class="game-over-text" id="game-over-text">Game Over!</div>
-            <button id="try-again-btn">Try Again</button>
-        </div>
     </div>
-    
-    <audio id="move-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3" preload="auto"></audio>
-    <audio id="merge-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-positive-interface-beep-221.mp3" preload="auto"></audio>
-    <audio id="gameover-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-retro-arcade-lose-2027.mp3" preload="auto"></audio>
-    <audio id="win-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3" preload="auto"></audio>
-    <audio id="powerup-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3" preload="auto"></audio>
     
     <script>
         // Game State
         let grid = [];
         let score = 0;
         let bestScore = localStorage.getItem('bestScore') || 0;
-        let isMuted = false;
-        let gameOver = false;
         
         // DOM Elements
         const gridElement = document.getElementById('grid');
         const scoreElement = document.getElementById('score');
         const bestElement = document.getElementById('best');
-        const gameOverElement = document.getElementById('game-over');
-        const gameOverTextElement = document.getElementById('game-over-text');
         const newGameBtn = document.getElementById('new-game-btn');
-        const tryAgainBtn = document.getElementById('try-again-btn');
-        const muteBtn = document.getElementById('mute-btn');
-        
-        // Audio Elements
-        const moveSound = document.getElementById('move-sound');
-        const mergeSound = document.getElementById('merge-sound');
-        const gameoverSound = document.getElementById('gameover-sound');
-        const winSound = document.getElementById('win-sound');
-        const powerupSound = document.getElementById('powerup-sound');
         
         // Initialize Game
         function initGame() {
@@ -283,11 +174,9 @@
                 }
             }
             
-            // Reset score and game state
+            // Reset score
             score = 0;
-            gameOver = false;
             updateScore();
-            gameOverElement.style.display = 'none';
             
             // Add initial tiles
             addRandomTile();
@@ -313,23 +202,16 @@
                 const { row, col } = emptyCells[Math.floor(Math.random() * emptyCells.length)];
                 grid[row][col] = Math.random() < 0.9 ? 2 : 4;
                 
-                // Create tile animation
+                // Create tile
                 const tile = document.createElement('div');
                 tile.className = `tile tile-${grid[row][col]}`;
                 tile.textContent = grid[row][col];
                 tile.dataset.row = row;
                 tile.dataset.col = col;
+                tile.style.top = `${row * 115 + 15}px`;
+                tile.style.left = `${col * 115 + 15}px`;
                 gridElement.appendChild(tile);
-                
-                // Position the tile
-                setTimeout(() => {
-                    tile.style.top = `${row * 115 + 15}px`;
-                    tile.style.left = `${col * 115 + 15}px`;
-                }, 10);
-                
-                return true;
             }
-            return false;
         }
         
         // Update the score display
@@ -342,42 +224,9 @@
             }
         }
         
-        // Play sound effect
-        function playSound(sound) {
-            if (!isMuted && sound) {
-                sound.currentTime = 0;
-                sound.play().catch(e => console.log("Audio play failed:", e));
-            }
-        }
-        
-        // Create confetti effect
-        function createConfetti() {
-            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
-            
-            for (let i = 0; i < 100; i++) {
-                const confetti = document.createElement('div');
-                confetti.className = 'confetti';
-                confetti.style.left = `${Math.random() * 100}%`;
-                confetti.style.top = '-10px';
-                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                confetti.style.width = `${Math.random() * 10 + 5}px`;
-                confetti.style.height = `${Math.random() * 10 + 5}px`;
-                confetti.style.animationDuration = `${Math.random() * 3 + 2}s`;
-                document.body.appendChild(confetti);
-                
-                // Remove confetti after animation
-                setTimeout(() => {
-                    confetti.remove();
-                }, 5000);
-            }
-        }
-        
         // Move tiles in a direction
         function moveTiles(direction) {
-            if (gameOver) return false;
-            
             let moved = false;
-            const oldGrid = JSON.parse(JSON.stringify(grid));
             
             // Process movement based on direction
             switch (direction) {
@@ -431,22 +280,12 @@
             }
             
             if (moved) {
-                playSound(moveSound);
                 updateTiles();
-                
                 setTimeout(() => {
                     addRandomTile();
                     updateTiles();
-                    
-                    if (checkGameOver()) {
-                        showGameOver(false);
-                    } else {
-                        checkWin();
-                    }
                 }, 100);
             }
-            
-            return moved;
         }
         
         // Process a single line (row or column)
@@ -459,11 +298,6 @@
                     filtered[i] *= 2;
                     filtered[i + 1] = 0;
                     score += filtered[i];
-                    playSound(mergeSound);
-                    
-                    if (filtered[i] >= 256) {
-                        playSound(powerupSound);
-                    }
                 }
             }
             
@@ -500,74 +334,8 @@
             updateScore();
         }
         
-        // Check if game is over
-        function checkGameOver() {
-            // Check for empty cells first
-            for (let row = 0; row < 4; row++) {
-                for (let col = 0; col < 4; col++) {
-                    if (grid[row][col] === 0) {
-                        return false;
-                    }
-                }
-            }
-            
-            // Check for possible merges
-            for (let row = 0; row < 4; row++) {
-                for (let col = 0; col < 4; col++) {
-                    const value = grid[row][col];
-                    
-                    // Check right neighbor
-                    if (col < 3 && grid[row][col + 1] === value) {
-                        return false;
-                    }
-                    
-                    // Check bottom neighbor
-                    if (row < 3 && grid[row + 1][col] === value) {
-                        return false;
-                    }
-                }
-            }
-            
-            return true;
-        }
-        
-        // Check for win condition
-        function checkWin() {
-            for (let row = 0; row < 4; row++) {
-                for (let col = 0; col < 4; col++) {
-                    if (grid[row][col] === 2048) {
-                        showGameOver(true);
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-        
-        // Show game over screen
-        function showGameOver(isWin) {
-            gameOver = true;
-            
-            if (isWin) {
-                gameOverTextElement.textContent = 'You Win!';
-                playSound(winSound);
-                createConfetti();
-            } else {
-                gameOverTextElement.textContent = 'Game Over!';
-                playSound(gameoverSound);
-            }
-            
-            gameOverElement.style.display = 'flex';
-        }
-        
         // Event Listeners
         newGameBtn.addEventListener('click', initGame);
-        tryAgainBtn.addEventListener('click', initGame);
-        
-        muteBtn.addEventListener('click', () => {
-            isMuted = !isMuted;
-            muteBtn.textContent = isMuted ? "🔇 Sound" : "🔊 Sound";
-        });
         
         // Keyboard controls
         document.addEventListener('keydown', (e) => {
@@ -585,46 +353,6 @@
                 e.preventDefault();
             }
         });
-        
-        // Touch controls for mobile
-        let touchStartX, touchStartY;
-        
-        document.addEventListener('touchstart', (e) => {
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-        }, { passive: false });
-        
-        document.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-        }, { passive: false });
-        
-        document.addEventListener('touchend', (e) => {
-            if (!touchStartX || !touchStartY) return;
-            
-            const touchEndX = e.changedTouches[0].clientX;
-            const touchEndY = e.changedTouches[0].clientY;
-            
-            const dx = touchEndX - touchStartX;
-            const dy = touchEndY - touchStartY;
-            
-            // Determine primary direction
-            if (Math.abs(dx) > Math.abs(dy)) {
-                if (dx > 50) {
-                    moveTiles('right');
-                } else if (dx < -50) {
-                    moveTiles('left');
-                }
-            } else {
-                if (dy > 50) {
-                    moveTiles('down');
-                } else if (dy < -50) {
-                    moveTiles('up');
-                }
-            }
-            
-            touchStartX = null;
-            touchStartY = null;
-        }, { passive: false });
         
         // Initialize the game
         initGame();
