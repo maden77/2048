@@ -94,6 +94,7 @@
 <body>
   <h1>2048 maden</h1>
   <div id="game-board"></div>
+  
   <p id="score">Score: 0</p>
   
   <!-- Elemen audio untuk berbagai suara -->
@@ -124,14 +125,17 @@
     
     // Inisialisasi game
     function initGame() {
-      createEmptyBoard();
-      addRandomTile();
-      addRandomTile();
-      drawBoard();
-      score = 0;
-      updateScore();
-      gameActive = true;
-      gameOverElement.style.display = "none";
+  grid = Array(4).fill().map(() => Array(4).fill(0)); // Reset grid
+  score = 0; // Reset skor
+  gameActive = true; // Set status game
+  gameOverElement.style.display = "none"; // Sembunyikan layar game over
+  
+  addRandomTile();
+  addRandomTile();
+  drawBoard();
+  updateScore();
+    }
+    
       
       // Aktifkan audio setelah interaksi pengguna pertama
       document.addEventListener('click', enableAudio, { once: true });
