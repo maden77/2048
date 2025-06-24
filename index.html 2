@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#faf8ef">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
+  
+  <title>2048 maden</title>
+  <style>
+    body {
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      touch-action: none;
+      font-family: sans-serif;
+      text-align: center;
+      background-color: #faf8ef;
+    }
+    
+    #game-board {
+      width: 320px;
+      height: 320px;
+      margin: 20px auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      gap: 5px;
+    }
+    
+    .tile {
+      width: 100%;
+      height: 100%;
+      background: #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+    
+    .tile-2    { background: #eee4da; color: #776e65; }
+    .tile-4    { background: #ede0c8; color: #776e65; }
+    .tile-8    { background: #f2b179; color: #f9f6f2; }
+    .tile-16   { background: #f59563; color: #f9f6f2; }
+    .tile-32   { background: #f67c5f; color: #f9f6f2; }
+    .tile-64   { background: #f65e3b; color: #f9f6f2; }
+    .tile-128  { background: #edcf72; color: #f9f6f2; font-size: 20px; }
+    .tile-256  { background: #edcc61; color: #f9f6f2; font-size: 20px; }
+    .tile-512  { background: #edc850; color: #f9f6f2; font-size: 20px; }
+    .tile-1024 { background: #edc53f; color: #f9f6f2; font-size: 18px; }
+    .tile-2048 { background: #edc22e; color: #f9f6f2; font-size: 18px; }
+    .tile-4096 { background: #3c3a32; color: #ffffff; }
+    .tile-8192 { background: #1f1d1a; color: #ffffff; }
+    
+    #score {
+      font-size: 20px;
+      margin: 10px;
+      font-weight: bold;
+    }
+    
+    #game-over {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 24px;
+      z-index: 100;
+    }
+    
+    #restart-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 18px;
+      background: #8f7a66;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>2048 maden</h1>
+  <div id="game-board"></div>
+  <p id="score">Score: 0</p>
+  
+  <!-- Elemen audio untuk berbagai suara -->
+  <audio id="soundSlide" src="geser.wav" preload="auto"></audio>
+  <audio id="soundMerge" src="gabung.wav" preload="auto"></audio>
+  <audio id="soundWin" src="menang.wav" preload="auto"></audio>
+  <audio id="soundLose" src="kalah.wav" preload="auto"></audio>
+  
+  <div id="game-over">
+    <h2>Game Over!</h2>
+    <p id="final-score">Skor akhir: 0</p>
+    <button id="restart-btn">Main Lagi</button>
+  </div>
+
+  <script>
+    // Variabel game
+    let grid = [];
+    let score = 0;
+    let gameActive = true;
+    let audioEnabled = false;
+    
+    // Elemen DOM
+    const boardElement = document.getElementById("game-board");
+    const scoreElement = document.getElementById("score");
+    const gameOverElement = document.getElementById("game-over");
+    const finalScoreElement = document.getElementById("final-score");
+    const restartBtn = document.getElementById("restart-btn");
+    
+    // Inisialisasi game
+    function initGame() {
+      createEmptyBoard();
+      addRandomTile();
+      addRandomTile();
+      drawBoard();
+      score = 0;
+      updateScore();
+      gameActive = true;
+      gameOverElement.style.display = "none";
+      
+      // Aktifkan audio setelah interaksi pengguna pertama
+      document.addEventListener('click', enableAudio, { once: true });
+      
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("service-worker.js");
+      }
+    }
+    
+    // Fungsi untuk mengaktifkan audio
+    function enableAudio() {
+      audioEnabled = true;
+      // Mainkan suara test pendek
+      playSound("soundSlide");
+    }
+    
+    // Fungsi untuk memainkan suara
+    function playSound(soundId) {
+      if (!audioEnabled) return;
+      
+      try {
+        const sound = document.getElementById(soundId);
+        sound.currentTime = 0;
+        sound.play().catch(e => console.log("Gagal memutar suara:", e));
+      } catch (e) {
+        console.log("Error memainkan suara:", e);
+      }
+    }
+    
+    // Fungsi game
+    function createEmptyBoard() {
+      grid = Array(4).fill().map(() => Array(4).fill(0));
+    }
+    
+    function drawBoard() {
+      boardElement.innerHTML = "";
+      
+      for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 4; j++) {
+          const tile = document.createElement("div");
+          tile.classList.add("tile");
+          
+          const val = grid[i][j];
+          if (val !== 0) {
+            tile.textContent = val;
+            tile.classList.add(`tile-${val}`);
+          }
+          
+          boardElement.appendChild(tile);
+        }
+      }
+    }
+    
+    function addRandomTile() {
+      const emptyCells = [];
+      
+      for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 4; j++) {
+          if (grid[i][j] === 0) {
+            emptyCells.push({ i, j });
+          }
+        }
+      }
+      
+      if (emptyCells.length > 0) {
+        const { i, j } = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+        grid[i][j] = Math.random() < 0.9 ? 2 : 4;
+      }
+    }
+    
+    function slide(row) {
+      // Filter nilai bukan nol
+      let arr = row.filter(val => val !== 0);
+      let newRow = [];
+      let scoreAdded = 0;
+      
+      // Gabungkan tile yang sama
+      for (let i = 0; i < arr.length; i++) {
+        if (i < arr.length - 1 && arr[i] === arr[i + 1]) {
+          newRow.push(arr[i] * 2);
+          scoreAdded += arr[i] * 2;
+          i++; // Lewati tile berikutnya karena sudah digabung
+        } else {
+          newRow.push(arr[i]);
+        }
+      }
+      
+      // Tambahkan nol di akhir
+      while (newRow.length < 4) {
+        newRow.push(0);
+      }
+      
+      return { row: newRow, scoreAdded };
+    }
+    
+    function move(direction) {
+      if (!gameActive) return false;
+      
+      let moved = false;
+      let scoreAdded = 0;
+      const oldGrid = JSON.parse(JSON.stringify(grid));
+      
+      switch (direction) {
+        case 'left':
+          for (let i = 0; i < 4; i++) {
+            const result = slide(grid[i]);
+            grid[i] = result.row;
+            scoreAdded += result.scoreAdded;
+            if (!arraysEqual(oldGrid[i], grid[i])) {
+              moved = true;
+            }
+          }
+          break;
+          
+        case 'right':
+          for (let i = 0; i < 4; i++) {
+            const reversedRow = [...grid[i]].reverse();
+            const result = slide(reversedRow);
+            grid[i] = result.row.reverse();
+            scoreAdded += result.scoreAdded;
+            if (!arraysEqual(oldGrid[i], grid[i])) {
+              moved = true;
+            }
+          }
+          break;
+          
+        case 'up':
+          for (let j = 0; j < 4; j++) {
+            let column = [grid[0][j], grid[1][j], grid[2][j], grid[3][j]];
+            const result = slide(column);
+            const newColumn = result.row;
+            scoreAdded += result.scoreAdded;
+            
+            for (let i = 0; i < 4; i++) {
+              if (grid[i][j] !== newColumn[i]) {
+                moved = true;
+              }
+              grid[i][j] = newColumn[i];
+            }
+          }
+          break;
+          
+        case 'down':
+          for (let j = 0; j < 4; j++) {
+            let column = [grid[3][j], grid[2][j], grid[1][j], grid[0][j]];
+            const result = slide(column);
+            const newColumn = result.row;
+            scoreAdded += result.scoreAdded;
+            
+            for (let i = 0; i < 4; i++) {
+              if (grid[3-i][j] !== newColumn[i]) {
+                moved = true;
+              }
+              grid[3-i][j] = newColumn[i];
+            }
+          }
+          break;
+      }
+      
+      if (moved) {
+        playSound("soundSlide");
+        
+        if (scoreAdded > 0) {
+          score += scoreAdded;
+          updateScore();
+          playSound("soundMerge");
+        }
+        
+        addRandomTile();
+        drawBoard();
+        
+        if (checkWin()) {
+          gameWin();
+        } else if (isGameOver()) {
+          gameOver();
+        }
+      }
+      
+      return moved;
+    }
+    
+    function arraysEqual(a, b) {
+      return JSON.stringify(a) === JSON.stringify(b);
+    }
+    
+    function updateScore() {
+      scoreElement.textContent = `Score: ${score}`;
+    }
+    
+    function checkWin() {
+      for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 4; j++) {
+          if (grid[i][j] === 2048) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+    
+    function isGameOver() {
+      // Cek jika ada ruang kosong
+      for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 4; j++) {
+          if (grid[i][j] === 0) {
+            return false;
+          }
+        }
+      }
+      
+      // Cek jika ada penggabungan yang mungkin
+      for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 4; j++) {
+          // Cek horizontal
+          if (j < 3 && grid[i][j] === grid[i][j + 1]) {
+            return false;
+          }
+          // Cek vertikal
+          if (i < 3 && grid[i][j] === grid[i + 1][j]) {
+            return false;
+          }
+        }
+      }
+      
+      return true;
+    }
+    
+    function gameWin() {
+      playSound("soundWin");
+      gameActive = false;
+      setTimeout(() => {
+        alert("Selamat! Anda mencapai 2048!");
+      }, 300);
+    }
+    
+    function gameOver() {
+      playSound("soundLose");
+      gameActive = false;
+      finalScoreElement.textContent = `Skor akhir: ${score}`;
+      gameOverElement.style.display = "flex";
+    }
+    
+    // Event listeners
+    document.addEventListener('keydown', (e) => {
+      e.preventDefault();
+      
+      switch (e.key) {
+        case 'ArrowLeft': move('left'); break;
+        case 'ArrowRight': move('right'); break;
+        case 'ArrowUp': move('up'); break;
+        case 'ArrowDown': move('down'); break;
+      }
+    });
+    
+    // Touch controls
+    let touchStartX, touchStartY;
+    
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }, { passive: false });
+    
+    document.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      
+      const diffX = touchEndX - touchStartX;
+      const diffY = touchEndY - touchStartY;
+      
+      // Tentukan arah swipe berdasarkan perbedaan koordinat
+      if (Math.abs(diffX) > Math.abs(diffY)) {
+        if (diffX > 50) {
+          move('right');
+        } else if (diffX < -50) {
+          move('left');
+        }
+      } else {
+        if (diffY > 50) {
+          move('down');
+        } else if (diffY < -50) {
+          move('up');
+        }
+      }
+    }, { passive: false });
+    
+    restartBtn.addEventListener('click', initGame);
+    
+    // Mulai game
+    initGame();
+  </script>
+</body>
+</html>
