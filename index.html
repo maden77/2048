@@ -158,6 +158,10 @@
       updateScore();
       addRandomTile(); addRandomTile();
       updateTiles();
+  if (!audioCtx) {
+    window.addEventListener('touchstart', () => playSound(), { once: true });
+    window.addEventListener('click', () => playSound(), { once: true });
+                            }
     }
 
     function updateScore() {
