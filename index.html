@@ -200,17 +200,20 @@
     }
 
     function processLine(line) {
-      line = line.filter(n => n);
-      for (let i = 0; i < line.length - 1; i++) {
-        if (line[i] === line[i + 1]) {
-          line[i] *= 2; score += line[i];
-          line[i + 1] = 0;
-        }
-      }
-      return [...line.filter(n => n), ...Array(4 - line.filter(n => n).length).fill(0)];
+  let filtered = line.filter(n => n);
+  for (let i = 0; i < filtered.length - 1; i++) {
+    if (filtered[i] === filtered[i + 1]) {
+      filtered[i] *= 2;
+      filtered[i + 1] = 0;
+      score += filtered[i];
+      playSound(); // 🔊 mainkan suara
+    }
+  }
+  filtered = filtered.filter(n => n);
+  return [...filtered, ...Array(4 - filtered.length).fill(0)];
     }
 
-    function moveTiles(dir) {
+      function moveTiles(dir) {
       if (!gameActive) return;
       const old = JSON.stringify(grid);
       if (dir === 'up' || dir === 'down') {
@@ -280,6 +283,14 @@
       navigator.serviceWorker.register('sw.js');
 
     window.addEventListener('load', () => setTimeout(initGame, 100));
+    function playSound() {
+  const a = new AudioContext();
+  const o = a.createOscillator();
+  o.connect(a.destination);
+  o.frequency.value = 400 + Math.random() * 200; // frekuensi acak 400–600Hz
+  o.start();
+  o.stop(a.currentTime + 0.1); // durasi 100ms
+    }
   </script>
 </body>
 </html>
