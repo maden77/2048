@@ -259,8 +259,13 @@
                 tile.textContent = grid[row][col];
                 tile.dataset.row = row;
                 tile.dataset.col = col;
-                tile.style.top = `${row * 115 + 15}px`;
-                tile.style.left = `${col * 115 + 15}px`;
+                const tileSize = 100; // ukuran .tile
+const tileGap = 15;   // gap antar tile
+const gridPadding = 15; // padding dari .grid
+
+tile.style.top = `${row * (tileSize + tileGap) + gridPadding}px`;
+tile.style.left = `${col * (tileSize + tileGap) + gridPadding}px`;
+                
                 gridElement.appendChild(tile);
             }
         }
