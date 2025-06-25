@@ -1,539 +1,395 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+   <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#faf8ef">
     <title>2048 Game</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            touch-action: none;
-        }
-        
-        body {
-            font-family: Arial, sans-serif;
-            background: #faf8ef;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            height: 100vh;
-            overflow: hidden;
-        }
-        
-        .header {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            max-width: 500px;
-            margin-bottom: 20px;
-        }
-        
-        h1 {
-            font-size: 60px;
-            color: #776e65;
-        }
-        
-        .scores {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .score-box {
-            background: #bbada0;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 5px;
-            font-weight: bold;
-            text-align: center;
-            min-width: 60px;
-        }
-        
-        .score-title {
-            font-size: 12px;
-            color: #eee4da;
-        }
-        
-        .score-value {
-            font-size: 20px;
-        }
-        
-        .controls {
-            margin-bottom: 20px;
-        }
-        
-        button {
-            background: #8f7a66;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            padding: 10px 15px;
-            font-weight: bold;
-            cursor: pointer;
-            margin: 0 5px;
-        }
-        
-        .grid-container {
-            background: #bbada0;
-            border-radius: 6px;
-            padding: 15px;
-            position: relative;
-            width: calc(100vw - 40px);
-            max-width: 500px;
-            aspect-ratio: 1/1;
-        }
-        
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            grid-gap: 15px;
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
-        
-        .cell {
-            background: rgba(238, 228, 218, 0.35);
-            border-radius: 5px;
-            position: relative;
-        }
-        
-        .tile {
-            position: absolute;
-            width: calc(25% - 11.25px);
-            height: calc(25% - 11.25px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 35px;
-            font-weight: bold;
-            border-radius: 5px;
-            background: #eee4da;
-            transition: all 0.1s ease-in-out;
-            z-index: 10;
-        }
-        
-        .tile-2 { background: #eee4da; }
-        .tile-4 { background: #ede0c8; }
-        .tile-8 { background: #f2b179; color: white; }
-        .tile-16 { background: #f59563; color: white; }
-        .tile-32 { background: #f67c5f; color: white; }
-        .tile-64 { background: #f65e3b; color: white; }
-        .tile-128 { background: #edcf72; color: white; font-size: 30px; }
-        .tile-256 { background: #edcc61; color: white; font-size: 30px; }
-        .tile-512 { background: #edc850; color: white; font-size: 30px; }
-        .tile-1024 { background: #edc53f; color: white; font-size: 25px; }
-        .tile-2048 { background: #edc22e; color: white; font-size: 25px; }
-        
-        .game-over {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(238, 228, 218, 0.9);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-        }
-        
-        .game-over h2 {
-            font-size: 60px;
-            color: #776e65;
-            margin-bottom: 20px;
-        }
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-        @media (max-width: 500px) {
-            h1 { font-size: 40px; }
-            .tile { font-size: 24px; }
-            .tile-128, .tile-256, .tile-512 { font-size: 22px; }
-            .tile-1024, .tile-2048 { font-size: 18px; }
-        }
-    </style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #faf8ef;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 500px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 60px;
+      color: #776e65;
+    }
+
+    .scores {
+      display: flex;
+      gap: 10px;
+    }
+
+    .score-box {
+      background: #bbada0;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-weight: bold;
+      text-align: center;
+      min-width: 60px;
+    }
+
+    .score-title {
+      font-size: 12px;
+      color: #eee4da;
+    }
+
+    .score-value {
+      font-size: 20px;
+    }
+
+    .controls {
+      margin-bottom: 20px;
+    }
+
+    button {
+      background: #8f7a66;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 15px;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 0 5px;
+    }
+
+    .grid-container {
+      background: #bbada0;
+      border-radius: 6px;
+      padding: 15px;
+      position: relative;
+      width: calc(100vw - 40px);
+      max-width: 500px;
+      aspect-ratio: 1/1;
+      touch-action: none;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-gap: 15px;
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .cell {
+      background: rgba(238, 228, 218, 0.35);
+      border-radius: 5px;
+      position: relative;
+    }
+
+    .tile {
+      position: absolute;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 35px;
+      font-weight: bold;
+      border-radius: 5px;
+      background: #eee4da;
+      transition: all 0.1s ease-in-out;
+      z-index: 10;
+    }
+
+    .tile-2 { background: #eee4da; }
+    .tile-4 { background: #ede0c8; }
+    .tile-8 { background: #f2b179; color: white; }
+    .tile-16 { background: #f59563; color: white; }
+    .tile-32 { background: #f67c5f; color: white; }
+    .tile-64 { background: #f65e3b; color: white; }
+    .tile-128 { background: #edcf72; color: white; font-size: 30px; }
+    .tile-256 { background: #edcc61; color: white; font-size: 30px; }
+    .tile-512 { background: #edc850; color: white; font-size: 30px; }
+    .tile-1024 { background: #edc53f; color: white; font-size: 25px; }
+    .tile-2048 { background: #edc22e; color: white; font-size: 25px; }
+
+    .game-over {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(238, 228, 218, 0.9);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .game-over h2 {
+      font-size: 60px;
+      color: #776e65;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 500px) {
+      h1 { font-size: 40px; }
+      .tile { font-size: 24px; }
+      .tile-128, .tile-256, .tile-512 { font-size: 22px; }
+      .tile-1024, .tile-2048 { font-size: 18px; }
+    }
+  </style>
 </head>
 <body>
-    <div class="header">
-        <h1>2048</h1>
-        <div class="scores">
-            <div class="score-box">
-                <div class="score-title">SCORE</div>
-                <div class="score-value" id="score">0</div>
-            </div>
-            <div class="score-box">
-                <div class="score-title">BEST</div>
-                <div class="score-value" id="best">0</div>
-            </div>
-        </div>
+  <div class="header">
+    <h1>2048</h1>
+    <div class="scores">
+      <div class="score-box">
+        <div class="score-title">SCORE</div>
+        <div class="score-value" id="score">0</div>
+      </div>
+      <div class="score-box">
+        <div class="score-title">BEST</div>
+        <div class="score-value" id="best">0</div>
+      </div>
     </div>
-    
-    <div class="controls">
-        <button id="new-game-btn">New Game</button>
-    </div>
-    
-    <div class="grid-container">
-        <div class="grid" id="grid"></div>
-    </div>
-    
-    <div class="game-over" id="game-over">
-        <h2 id="game-over-text">Game Over!</h2>
-        <button id="try-again-btn">Try Again</button>
-    </div>
-    
-    <script>
-        // Game State
-        let grid = [];
-        let score = 0;
-        let bestScore = localStorage.getItem('bestScore') || 0;
-        let gameActive = true;
-        
-        // DOM Elements
-        const gridElement = document.getElementById('grid');
-        const scoreElement = document.getElementById('score');
-        const bestElement = document.getElementById('best');
-        const newGameBtn = document.getElementById('new-game-btn');
-        const tryAgainBtn = document.getElementById('try-again-btn');
-        const gameOverElement = document.getElementById('game-over');
-        const gameOverTextElement = document.getElementById('game-over-text');
-        const gridContainer = document.querySelector('.grid-container');
-        
-        // Initialize Game
-        function initGame() {
-            // Create empty grid
-            grid = Array(4).fill().map(() => Array(4).fill(0));
-            
-            // Clear the grid UI
-            gridElement.innerHTML = '';
-            
-            // Create cells
-            for (let row = 0; row < 4; row++) {
-                for (let col = 0; col < 4; col++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'cell';
-                    gridElement.appendChild(cell);
-                }
-            }
-            
-            // Reset score and state
-            score = 0;
-            gameActive = true;
-            updateScore();
-            gameOverElement.style.display = 'none';
-            
-            // Add initial tiles
-            addRandomTile();
-            addRandomTile();
-            
-            // Update best score display
-            bestElement.textContent = bestScore;
+  </div>
+
+  <div class="controls">
+    <button id="new-game-btn">New Game</button>
+  </div>
+
+  <div class="grid-container">
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <div class="game-over" id="game-over">
+    <h2 id="game-over-text">Game Over!</h2>
+    <button id="try-again-btn">Try Again</button>
+  </div>
+
+  <script>
+    let grid = [];
+    let score = 0;
+    let bestScore = localStorage.getItem('bestScore') || 0;
+    let gameActive = true;
+
+    const gridElement = document.getElementById('grid');
+    const scoreElement = document.getElementById('score');
+    const bestElement = document.getElementById('best');
+    const newGameBtn = document.getElementById('new-game-btn');
+    const tryAgainBtn = document.getElementById('try-again-btn');
+    const gameOverElement = document.getElementById('game-over');
+    const gameOverTextElement = document.getElementById('game-over-text');
+    const gridContainer = document.querySelector('.grid-container');
+
+    function initGame() {
+      grid = Array(4).fill().map(() => Array(4).fill(0));
+      gridElement.innerHTML = '';
+
+      for (let i = 0; i < 16; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        gridElement.appendChild(cell);
+      }
+
+      score = 0;
+      gameActive = true;
+      updateScore();
+      gameOverElement.style.display = 'none';
+      addRandomTile();
+      addRandomTile();
+      bestElement.textContent = bestScore;
+    }
+
+    function addRandomTile() {
+      const empty = [];
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          if (grid[r][c] === 0) empty.push({ r, c });
         }
-        
-        // Add a random tile (2 or 4)
-        function addRandomTile() {
-            const emptyCells = [];
-            
-            for (let row = 0; row < 4; row++) {
-                for (let col = 0; col < 4; col++) {
-                    if (grid[row][col] === 0) {
-                        emptyCells.push({ row, col });
-                    }
-                }
-            }
-            
-            if (emptyCells.length > 0) {
-                const { row, col } = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-                grid[row][col] = Math.random() < 0.9 ? 2 : 4;
-                createTile(row, col, grid[row][col]);
-            }
+      }
+      if (empty.length > 0) {
+        const { r, c } = empty[Math.floor(Math.random() * empty.length)];
+        grid[r][c] = Math.random() < 0.9 ? 2 : 4;
+        createTile(r, c, grid[r][c]);
+      }
+    }
+
+    function createTile(r, c, val) {
+      const tile = document.createElement('div');
+      tile.className = `tile tile-${val}`;
+      tile.textContent = val;
+
+      const gap = 15;
+      const tileSize = (gridContainer.offsetWidth - gap * 5) / 4;
+      const posX = c * (tileSize + gap) + gap;
+      const posY = r * (tileSize + gap) + gap;
+
+      tile.style.width = `${tileSize}px`;
+      tile.style.height = `${tileSize}px`;
+      tile.style.left = `${posX}px`;
+      tile.style.top = `${posY}px`;
+
+      gridContainer.appendChild(tile);
+    }
+
+    function updateScore() {
+      scoreElement.textContent = score;
+      if (score > bestScore) {
+        bestScore = score;
+        bestElement.textContent = bestScore;
+        localStorage.setItem('bestScore', bestScore);
+      }
+    }
+
+    function moveTiles(dir) {
+      if (!gameActive) return;
+
+      let moved = false;
+      const original = JSON.stringify(grid);
+
+      if (dir === 'up' || dir === 'down') {
+        for (let c = 0; c < 4; c++) {
+          let col = [0, 1, 2, 3].map(r => grid[r][c]);
+          if (dir === 'down') col.reverse();
+          let merged = processLine(col);
+          if (dir === 'down') merged.reverse();
+          for (let r = 0; r < 4; r++) grid[r][c] = merged[r];
         }
-        
-        // Create tile element
-        function createTile(row, col, value) {
+      } else {
+        for (let r = 0; r < 4; r++) {
+          let row = [...grid[r]];
+          if (dir === 'right') row.reverse();
+          let merged = processLine(row);
+          if (dir === 'right') merged.reverse();
+          grid[r] = merged;
+        }
+      }
+
+      if (JSON.stringify(grid) !== original) {
+        updateTiles();
+        setTimeout(() => {
+          addRandomTile();
+          updateTiles();
+          if (isGameOver()) showGameOver();
+        }, 100);
+      }
+    }
+
+    function processLine(line) {
+      line = line.filter(n => n !== 0);
+      for (let i = 0; i < line.length - 1; i++) {
+        if (line[i] === line[i + 1]) {
+          line[i] *= 2;
+          score += line[i];
+          line[i + 1] = 0;
+        }
+      }
+      return [...line.filter(n => n), ...Array(4 - line.filter(n => n).length).fill(0)];
+    }
+
+    function updateTiles() {
+      document.querySelectorAll('.tile').forEach(t => t.remove());
+
+      const gap = 15;
+      const tileSize = (gridContainer.offsetWidth - gap * 5) / 4;
+
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          if (grid[r][c] !== 0) {
             const tile = document.createElement('div');
-            tile.className = `tile tile-${value}`;
-            tile.textContent = value;
-            tile.dataset.row = row;
-            tile.dataset.col = col;
-            
-            // Calculate position
-            const cellSize = gridContainer.offsetWidth / 4;
-            const tileSize = cellSize - 15;
-            const posX = col * cellSize + 15;
-            const posY = row * cellSize + 15;
-            
+            tile.className = `tile tile-${grid[r][c]}`;
+            tile.textContent = grid[r][c];
+
+            const posX = c * (tileSize + gap) + gap;
+            const posY = r * (tileSize + gap) + gap;
+
             tile.style.width = `${tileSize}px`;
             tile.style.height = `${tileSize}px`;
             tile.style.left = `${posX}px`;
             tile.style.top = `${posY}px`;
-            
+
+            if (grid[r][c] >= 128) tile.style.fontSize = '30px';
+            if (grid[r][c] >= 1024) tile.style.fontSize = '25px';
+
             gridContainer.appendChild(tile);
-            return tile;
+          }
         }
-        
-        // Update the score display
-        function updateScore() {
-            scoreElement.textContent = score;
-            if (score > bestScore) {
-                bestScore = score;
-                bestElement.textContent = bestScore;
-                localStorage.setItem('bestScore', bestScore);
-            }
+      }
+      updateScore();
+    }
+
+    function isGameOver() {
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          if (grid[r][c] === 0) return false;
+          if (c < 3 && grid[r][c] === grid[r][c + 1]) return false;
+          if (r < 3 && grid[r][c] === grid[r + 1][c]) return false;
         }
-        
-        // Move tiles in a direction
-        function moveTiles(direction) {
-            if (!gameActive) return false;
-            
-            let moved = false;
-            const oldGrid = JSON.parse(JSON.stringify(grid));
-            
-            // Process movement based on direction
-            switch (direction) {
-                case 'up':
-                    for (let col = 0; col < 4; col++) {
-                        let column = [grid[0][col], grid[1][col], grid[2][col], grid[3][col]];
-                        let result = processLine(column);
-                        for (let row = 0; row < 4; row++) {
-                            grid[row][col] = result[row];
-                        }
-                        if (JSON.stringify(column) !== JSON.stringify(result)) {
-                            moved = true;
-                        }
-                    }
-                    break;
-                    
-                case 'down':
-                    for (let col = 0; col < 4; col++) {
-                        let column = [grid[3][col], grid[2][col], grid[1][col], grid[0][col]];
-                        let result = processLine(column);
-                        result = result.reverse();
-                        for (let row = 0; row < 4; row++) {
-                            grid[row][col] = result[row];
-                        }
-                        if (JSON.stringify([grid[3][col], grid[2][col], grid[1][col], grid[0][col]]) !== JSON.stringify(result.reverse())) {
-                            moved = true;
-                        }
-                    }
-                    break;
-                    
-                case 'left':
-                    for (let row = 0; row < 4; row++) {
-                        let oldRow = [...grid[row]];
-                        grid[row] = processLine(grid[row]);
-                        if (JSON.stringify(oldRow) !== JSON.stringify(grid[row])) {
-                            moved = true;
-                        }
-                    }
-                    break;
-                    
-                case 'right':
-                    for (let row = 0; row < 4; row++) {
-                        let reversed = [...grid[row]].reverse();
-                        let processed = processLine(reversed).reverse();
-                        if (JSON.stringify(grid[row]) !== JSON.stringify(processed)) {
-                            moved = true;
-                        }
-                        grid[row] = processed;
-                    }
-                    break;
-            }
-            
-            if (moved) {
-                updateTiles();
-                setTimeout(() => {
-                    addRandomTile();
-                    updateTiles();
-                    
-                    if (isGameOver()) {
-                        showGameOver();
-                    }
-                }, 100);
-            }
-            
-            return moved;
-        }
-        
-        // Process a single line (row or column)
-        function processLine(line) {
-            let filtered = line.filter(val => val !== 0);
-            
-            // Merge tiles
-            for (let i = 0; i < filtered.length - 1; i++) {
-                if (filtered[i] === filtered[i + 1]) {
-                    filtered[i] *= 2;
-                    filtered[i + 1] = 0;
-                    score += filtered[i];
-                }
-            }
-            
-            filtered = filtered.filter(val => val !== 0);
-            while (filtered.length < 4) {
-                filtered.push(0);
-            }
-            
-            return filtered;
-        }
-        
-        // Update all tiles after movement
-        function updateTiles() {
-            // Remove all tile elements
-            const tiles = document.querySelectorAll('.tile');
-            tiles.forEach(tile => tile.remove());
-            
-            // Create new tiles based on current grid
-            const cellSize = gridContainer.offsetWidth / 4;
-            const tileSize = cellSize - 15;
-            
-            for (let row = 0; row < 4; row++) {
-                for (let col = 0; col < 4; col++) {
-                    if (grid[row][col] !== 0) {
-                        const tile = document.createElement('div');
-                        tile.className = `tile tile-${grid[row][col]}`;
-                        tile.textContent = grid[row][col];
-                        
-                        // Calculate position
-                        const posX = col * cellSize + 15;
-                        const posY = row * cellSize + 15;
-                        
-                        tile.style.width = `${tileSize}px`;
-                        tile.style.height = `${tileSize}px`;
-                        tile.style.left = `${posX}px`;
-                        tile.style.top = `${posY}px`;
-                        
-                        // Adjust font size for smaller numbers
-                        if (grid[row][col] >= 128) {
-                            tile.style.fontSize = '30px';
-                        }
-                        if (grid[row][col] >= 1024) {
-                            tile.style.fontSize = '25px';
-                        }
-                        
-                        gridContainer.appendChild(tile);
-                    }
-                }
-            }
-            
-            updateScore();
-        }
-        
-        // Check if game is over
-        function isGameOver() {
-            // Check for empty cells first
-            for (let row = 0; row < 4; row++) {
-                for (let col = 0; col < 4; col++) {
-                    if (grid[row][col] === 0) {
-                        return false;
-                    }
-                }
-            }
-            
-            // Check for possible merges
-            for (let row = 0; row < 4; row++) {
-                for (let col = 0; col < 4; col++) {
-                    const value = grid[row][col];
-                    
-                    // Check right neighbor
-                    if (col < 3 && grid[row][col + 1] === value) {
-                        return false;
-                    }
-                    
-                    // Check bottom neighbor
-                    if (row < 3 && grid[row + 1][col] === value) {
-                        return false;
-                    }
-                }
-            }
-            
-            return true;
-        }
-        
-        // Check for win condition
-        function checkWin() {
-            for (let row = 0; row < 4; row++) {
-                for (let col = 0; col < 4; col++) {
-                    if (grid[row][col] === 2048) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-        
-        // Show game over screen
-        function showGameOver() {
-            gameActive = false;
-            
-            if (checkWin()) {
-                gameOverTextElement.textContent = 'You Win!';
-            } else {
-                gameOverTextElement.textContent = 'Game Over!';
-            }
-            
-            gameOverElement.style.display = 'flex';
-        }
-        
-        // Event Listeners
-        newGameBtn.addEventListener('click', initGame);
-        tryAgainBtn.addEventListener('click', initGame);
-        
-        // Keyboard controls
-        document.addEventListener('keydown', (e) => {
-            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
-                e.preventDefault();
-                moveTiles(e.key.replace('Arrow', '').toLowerCase());
-            }
-        });
-        
-        // Touch controls
-        let touchStartX = 0;
-        let touchStartY = 0;
-        let touchEndX = 0;
-        let touchEndY = 0;
-        
-        gridContainer.addEventListener('touchstart', function(e) {
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-        }, { passive: true });
-        
-        gridContainer.addEventListener('touchend', function(e) {
-            touchEndX = e.changedTouches[0].clientX;
-            touchEndY = e.changedTouches[0].clientY;
-            handleSwipe();
-        }, { passive: true });
-        
-        function handleSwipe() {
-            const dx = touchEndX - touchStartX;
-            const dy = touchEndY - touchStartY;
-            const absDx = Math.abs(dx);
-            const absDy = Math.abs(dy);
-            
-            // Minimum swipe distance threshold
-            const threshold = 30;
-            
-            if (Math.max(absDx, absDy) < threshold) return;
-            
-            if (absDx > absDy) {
-                // Horizontal swipe
-                if (dx > 0) {
-                    moveTiles('right');
-                } else {
-                    moveTiles('left');
-                }
-            } else {
-                // Vertical swipe
-                if (dy > 0) {
-                    moveTiles('down');
-                } else {
-                    moveTiles('up');
-                }
-            }
-        }
-        
-        // Initialize the game
-        initGame();
-    </script>
+      }
+      return true;
+    }
+
+    function checkWin() {
+      return grid.flat().includes(2048);
+    }
+
+    function showGameOver() {
+      gameActive = false;
+      gameOverTextElement.textContent = checkWin() ? 'You Win!' : 'Game Over!';
+      gameOverElement.style.display = 'flex';
+    }
+
+    newGameBtn.addEventListener('click', initGame);
+    tryAgainBtn.addEventListener('click', initGame);
+
+    document.addEventListener('keydown', e => {
+      if (!e.key.includes('Arrow')) return;
+      e.preventDefault();
+      moveTiles(e.key.replace('Arrow', '').toLowerCase());
+    });
+
+    let touchStartX = 0, touchStartY = 0;
+
+    gridContainer.addEventListener('touchstart', e => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    gridContainer.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      const dy = e.changedTouches[0].clientY - touchStartY;
+      const absDx = Math.abs(dx), absDy = Math.abs(dy);
+      if (Math.max(absDx, absDy) > 30) {
+        if (absDx > absDy) moveTiles(dx > 0 ? 'right' : 'left');
+        else moveTiles(dy > 0 ? 'down' : 'up');
+      }
+    }, { passive: true });
+
+    initGame();
+      <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('Service Worker registered:', reg.scope))
+      .catch(err => console.log('Service Worker failed:', err));
+  }
+
+  </script>
 </body>
 </html>
