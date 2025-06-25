@@ -84,13 +84,6 @@
     box-sizing: border-box;
         }
         
-         .grid {
-            display: grid;
-            grid-template-columns: repeat(4, 100px);
-            grid-gap: 15px;
-            position: relative;
-        }
-        
         .cell {
             width: 100px;
             height: 100px;
@@ -141,7 +134,19 @@
     height: 60px;
     font-size: 24px;
   }
-
+.tile {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 45px;
+  font-weight: bold;
+  border-radius: 5px;
+  background: #eee4da;
+  transition: all 0.1s;
+}
   .tile-128,
   .tile-256,
   .tile-512 {
@@ -255,6 +260,7 @@
                 tile.textContent = grid[row][col];
                 tile.dataset.row = row;
                 tile.dataset.col = col;
+                
                 const tileSize = 100; // ukuran .tile
 const tileGap = 15;   // gap antar tile
 const gridPadding = 15; // padding dari .grid
