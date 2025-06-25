@@ -2,17 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-   <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#faf8ef">
-    <title>2048 Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>2048</title>
+  <meta name="theme-color" content="#faf8ef">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon2048-192x192.png" sizes="192x192">
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: Arial, sans-serif;
       background: #faf8ef;
@@ -23,7 +19,6 @@
       height: 100vh;
       overflow: hidden;
     }
-
     .header {
       display: flex;
       justify-content: space-between;
@@ -31,40 +26,22 @@
       max-width: 500px;
       margin-bottom: 20px;
     }
-
-    h1 {
-      font-size: 60px;
-      color: #776e65;
-    }
-
+    h1 { font-size: 60px; color: #776e65; }
     .scores {
       display: flex;
       gap: 10px;
     }
-
     .score-box {
       background: #bbada0;
       color: white;
       padding: 10px 15px;
       border-radius: 5px;
-      font-weight: bold;
       text-align: center;
       min-width: 60px;
     }
-
-    .score-title {
-      font-size: 12px;
-      color: #eee4da;
-    }
-
-    .score-value {
-      font-size: 20px;
-    }
-
-    .controls {
-      margin-bottom: 20px;
-    }
-
+    .score-title { font-size: 12px; color: #eee4da; }
+    .score-value { font-size: 20px; font-weight: bold; }
+    .controls { margin-bottom: 20px; }
     button {
       background: #8f7a66;
       color: white;
@@ -73,9 +50,7 @@
       padding: 10px 15px;
       font-weight: bold;
       cursor: pointer;
-      margin: 0 5px;
     }
-
     .grid-container {
       background: #bbada0;
       border-radius: 6px;
@@ -86,22 +61,17 @@
       aspect-ratio: 1/1;
       touch-action: none;
     }
-
     .grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       grid-gap: 15px;
       width: 100%;
       height: 100%;
-      position: relative;
     }
-
     .cell {
       background: rgba(238, 228, 218, 0.35);
       border-radius: 5px;
-      position: relative;
     }
-
     .tile {
       position: absolute;
       display: flex;
@@ -110,11 +80,9 @@
       font-size: 35px;
       font-weight: bold;
       border-radius: 5px;
-      background: #eee4da;
-      transition: all 0.1s ease-in-out;
+      transition: 0.1s ease-in-out;
       z-index: 10;
     }
-
     .tile-2 { background: #eee4da; }
     .tile-4 { background: #ede0c8; }
     .tile-8 { background: #f2b179; color: white; }
@@ -126,13 +94,9 @@
     .tile-512 { background: #edc850; color: white; font-size: 30px; }
     .tile-1024 { background: #edc53f; color: white; font-size: 25px; }
     .tile-2048 { background: #edc22e; color: white; font-size: 25px; }
-
     .game-over {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(238, 228, 218, 0.9);
       display: none;
       flex-direction: column;
@@ -140,18 +104,10 @@
       align-items: center;
       z-index: 100;
     }
-
     .game-over h2 {
       font-size: 60px;
       color: #776e65;
       margin-bottom: 20px;
-    }
-
-    @media (max-width: 500px) {
-      h1 { font-size: 40px; }
-      .tile { font-size: 24px; }
-      .tile-128, .tile-256, .tile-512 { font-size: 22px; }
-      .tile-1024, .tile-2048 { font-size: 18px; }
     }
   </style>
 </head>
@@ -169,84 +125,39 @@
       </div>
     </div>
   </div>
-
   <div class="controls">
     <button id="new-game-btn">New Game</button>
   </div>
-
-  <div class="grid-container">
+  <div class="grid-container" id="grid-container">
     <div class="grid" id="grid"></div>
   </div>
-
   <div class="game-over" id="game-over">
     <h2 id="game-over-text">Game Over!</h2>
     <button id="try-again-btn">Try Again</button>
   </div>
 
   <script>
-    let grid = [];
-    let score = 0;
-    let bestScore = localStorage.getItem('bestScore') || 0;
-    let gameActive = true;
-
-    const gridElement = document.getElementById('grid');
-    const scoreElement = document.getElementById('score');
-    const bestElement = document.getElementById('best');
-    const newGameBtn = document.getElementById('new-game-btn');
-    const tryAgainBtn = document.getElementById('try-again-btn');
-    const gameOverElement = document.getElementById('game-over');
-    const gameOverTextElement = document.getElementById('game-over-text');
-    const gridContainer = document.querySelector('.grid-container');
+    let grid = [], score = 0, bestScore = localStorage.getItem('bestScore') || 0, gameActive = true;
+    const gridElement = document.getElementById('grid'),
+          gridContainer = document.getElementById('grid-container'),
+          scoreElement = document.getElementById('score'),
+          bestElement = document.getElementById('best'),
+          gameOverElement = document.getElementById('game-over'),
+          gameOverText = document.getElementById('game-over-text');
 
     function initGame() {
       grid = Array(4).fill().map(() => Array(4).fill(0));
       gridElement.innerHTML = '';
-
       for (let i = 0; i < 16; i++) {
         const cell = document.createElement('div');
         cell.className = 'cell';
         gridElement.appendChild(cell);
       }
-
-      score = 0;
-      gameActive = true;
-      updateScore();
+      score = 0; gameActive = true;
       gameOverElement.style.display = 'none';
-      addRandomTile();
-      addRandomTile();
-      bestElement.textContent = bestScore;
-    }
-
-    function addRandomTile() {
-      const empty = [];
-      for (let r = 0; r < 4; r++) {
-        for (let c = 0; c < 4; c++) {
-          if (grid[r][c] === 0) empty.push({ r, c });
-        }
-      }
-      if (empty.length > 0) {
-        const { r, c } = empty[Math.floor(Math.random() * empty.length)];
-        grid[r][c] = Math.random() < 0.9 ? 2 : 4;
-        createTile(r, c, grid[r][c]);
-      }
-    }
-
-    function createTile(r, c, val) {
-      const tile = document.createElement('div');
-      tile.className = `tile tile-${val}`;
-      tile.textContent = val;
-
-      const gap = 15;
-      const tileSize = (gridContainer.offsetWidth - gap * 5) / 4;
-      const posX = c * (tileSize + gap) + gap;
-      const posY = r * (tileSize + gap) + gap;
-
-      tile.style.width = `${tileSize}px`;
-      tile.style.height = `${tileSize}px`;
-      tile.style.left = `${posX}px`;
-      tile.style.top = `${posY}px`;
-
-      gridContainer.appendChild(tile);
+      updateScore();
+      addRandomTile(); addRandomTile();
+      updateTiles();
     }
 
     function updateScore() {
@@ -255,141 +166,120 @@
         bestScore = score;
         bestElement.textContent = bestScore;
         localStorage.setItem('bestScore', bestScore);
+      } else {
+        bestElement.textContent = bestScore;
       }
     }
 
-    function moveTiles(dir) {
-      if (!gameActive) return;
-
-      let moved = false;
-      const original = JSON.stringify(grid);
-
-      if (dir === 'up' || dir === 'down') {
-        for (let c = 0; c < 4; c++) {
-          let col = [0, 1, 2, 3].map(r => grid[r][c]);
-          if (dir === 'down') col.reverse();
-          let merged = processLine(col);
-          if (dir === 'down') merged.reverse();
-          for (let r = 0; r < 4; r++) grid[r][c] = merged[r];
-        }
-      } else {
-        for (let r = 0; r < 4; r++) {
-          let row = [...grid[r]];
-          if (dir === 'right') row.reverse();
-          let merged = processLine(row);
-          if (dir === 'right') merged.reverse();
-          grid[r] = merged;
-        }
+    function addRandomTile() {
+      const empty = [];
+      for (let r = 0; r < 4; r++)
+        for (let c = 0; c < 4; c++)
+          if (grid[r][c] === 0) empty.push({ r, c });
+      if (empty.length) {
+        const { r, c } = empty[Math.floor(Math.random() * empty.length)];
+        grid[r][c] = Math.random() < 0.9 ? 2 : 4;
       }
+    }
 
-      if (JSON.stringify(grid) !== original) {
-        updateTiles();
-        setTimeout(() => {
-          addRandomTile();
-          updateTiles();
-          if (isGameOver()) showGameOver();
-        }, 100);
-      }
+    function updateTiles() {
+      document.querySelectorAll('.tile').forEach(t => t.remove());
+      const gap = 15, tileSize = (gridContainer.offsetWidth - gap * 5) / 4;
+      for (let r = 0; r < 4; r++)
+        for (let c = 0; c < 4; c++)
+          if (grid[r][c]) {
+            const tile = document.createElement('div');
+            tile.className = `tile tile-${grid[r][c]}`;
+            tile.textContent = grid[r][c];
+            tile.style.width = tile.style.height = `${tileSize}px`;
+            tile.style.left = `${c * (tileSize + gap) + gap}px`;
+            tile.style.top = `${r * (tileSize + gap) + gap}px`;
+            gridContainer.appendChild(tile);
+          }
+      updateScore();
     }
 
     function processLine(line) {
-      line = line.filter(n => n !== 0);
+      line = line.filter(n => n);
       for (let i = 0; i < line.length - 1; i++) {
         if (line[i] === line[i + 1]) {
-          line[i] *= 2;
-          score += line[i];
+          line[i] *= 2; score += line[i];
           line[i + 1] = 0;
         }
       }
       return [...line.filter(n => n), ...Array(4 - line.filter(n => n).length).fill(0)];
     }
 
-    function updateTiles() {
-      document.querySelectorAll('.tile').forEach(t => t.remove());
-
-      const gap = 15;
-      const tileSize = (gridContainer.offsetWidth - gap * 5) / 4;
-
-      for (let r = 0; r < 4; r++) {
+    function moveTiles(dir) {
+      if (!gameActive) return;
+      const old = JSON.stringify(grid);
+      if (dir === 'up' || dir === 'down') {
         for (let c = 0; c < 4; c++) {
-          if (grid[r][c] !== 0) {
-            const tile = document.createElement('div');
-            tile.className = `tile tile-${grid[r][c]}`;
-            tile.textContent = grid[r][c];
-
-            const posX = c * (tileSize + gap) + gap;
-            const posY = r * (tileSize + gap) + gap;
-
-            tile.style.width = `${tileSize}px`;
-            tile.style.height = `${tileSize}px`;
-            tile.style.left = `${posX}px`;
-            tile.style.top = `${posY}px`;
-
-            if (grid[r][c] >= 128) tile.style.fontSize = '30px';
-            if (grid[r][c] >= 1024) tile.style.fontSize = '25px';
-
-            gridContainer.appendChild(tile);
-          }
+          let col = grid.map(row => row[c]);
+          if (dir === 'down') col.reverse();
+          let newCol = processLine(col);
+          if (dir === 'down') newCol.reverse();
+          for (let r = 0; r < 4; r++) grid[r][c] = newCol[r];
+        }
+      } else {
+        for (let r = 0; r < 4; r++) {
+          let row = [...grid[r]];
+          if (dir === 'right') row.reverse();
+          let newRow = processLine(row);
+          if (dir === 'right') newRow.reverse();
+          grid[r] = newRow;
         }
       }
-      updateScore();
+      if (JSON.stringify(grid) !== old) {
+        addRandomTile();
+        updateTiles();
+        if (checkGameOver()) showGameOver();
+      }
     }
 
-    function isGameOver() {
-      for (let r = 0; r < 4; r++) {
+    function checkGameOver() {
+      for (let r = 0; r < 4; r++)
         for (let c = 0; c < 4; c++) {
           if (grid[r][c] === 0) return false;
           if (c < 3 && grid[r][c] === grid[r][c + 1]) return false;
           if (r < 3 && grid[r][c] === grid[r + 1][c]) return false;
         }
-      }
       return true;
-    }
-
-    function checkWin() {
-      return grid.flat().includes(2048);
     }
 
     function showGameOver() {
       gameActive = false;
-      gameOverTextElement.textContent = checkWin() ? 'You Win!' : 'Game Over!';
+      gameOverText.textContent = 'Game Over!';
       gameOverElement.style.display = 'flex';
     }
 
-    newGameBtn.addEventListener('click', initGame);
-    tryAgainBtn.addEventListener('click', initGame);
+    document.getElementById('new-game-btn').onclick = initGame;
+    document.getElementById('try-again-btn').onclick = initGame;
 
     document.addEventListener('keydown', e => {
-      if (!e.key.includes('Arrow')) return;
-      e.preventDefault();
-      moveTiles(e.key.replace('Arrow', '').toLowerCase());
+      const key = e.key.replace('Arrow', '').toLowerCase();
+      if (['up', 'down', 'left', 'right'].includes(key)) {
+        e.preventDefault(); moveTiles(key);
+      }
     });
 
-    let touchStartX = 0, touchStartY = 0;
-
+    let startX, startY;
     gridContainer.addEventListener('touchstart', e => {
-      touchStartX = e.touches[0].clientX;
-      touchStartY = e.touches[0].clientY;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
     }, { passive: true });
 
     gridContainer.addEventListener('touchend', e => {
-      const dx = e.changedTouches[0].clientX - touchStartX;
-      const dy = e.changedTouches[0].clientY - touchStartY;
-      const absDx = Math.abs(dx), absDy = Math.abs(dy);
-      if (Math.max(absDx, absDy) > 30) {
-        if (absDx > absDy) moveTiles(dx > 0 ? 'right' : 'left');
-        else moveTiles(dy > 0 ? 'down' : 'up');
-      }
+      const dx = e.changedTouches[0].clientX - startX,
+            dy = e.changedTouches[0].clientY - startY;
+      if (Math.abs(dx) > Math.abs(dy)) moveTiles(dx > 0 ? 'right' : 'left');
+      else moveTiles(dy > 0 ? 'down' : 'up');
     }, { passive: true });
 
-    initGame();
-      <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js')
-      .then(reg => console.log('Service Worker registered:', reg.scope))
-      .catch(err => console.log('Service Worker failed:', err));
-  }
+    if ('serviceWorker' in navigator)
+      navigator.serviceWorker.register('sw.js');
 
+    window.addEventListener('load', () => setTimeout(initGame, 100));
   </script>
 </body>
 </html>
