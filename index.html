@@ -65,17 +65,13 @@
             cursor: pointer;
             margin: 0 5px;
         }
-        .grid-container {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  width: 100%;
-  max-width: 400px;
+        .grid {
+  grid-template-columns: repeat(4, 100px);
+  grid-gap: 15px;
+  padding: 15px;
+  position: relative; /* penting! */
 }
-.tile {
-  font-size: calc(10px + 2vw); /* agar teks mengecil di layar kecil */
-}
-        .grid-container {
+         .grid-container {
     background: #bbada0;
     border-radius: 6px;
     padding: 15px;
