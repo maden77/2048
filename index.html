@@ -2,28 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <meta name="theme-color" content="#faf8ef">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>2048 Game</title>
     <style>
-        html, body {
-            height: 100%;
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: Arial, sans-serif;
-            background: #faf8ef;
             touch-action: none;
-            overflow: hidden;
         }
         
         body {
+            font-family: Arial, sans-serif;
+            background: #faf8ef;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
             padding: 20px;
-            box-sizing: border-box;
-            text-align: center;
+            height: 100vh;
+            overflow: hidden;
         }
         
         .header {
@@ -31,12 +28,11 @@
             justify-content: space-between;
             width: 100%;
             max-width: 500px;
-            margin: 0 auto 20px;
+            margin-bottom: 20px;
         }
         
         h1 {
             font-size: 60px;
-            margin: 0;
             color: #776e65;
         }
         
@@ -83,8 +79,10 @@
             background: #bbada0;
             border-radius: 6px;
             padding: 15px;
-            display: inline-block;
-            margin: auto;
+            position: relative;
+            width: calc(100vw - 40px);
+            max-width: 500px;
+            aspect-ratio: 1/1;
         }
         
         .grid {
@@ -92,35 +90,29 @@
             grid-template-columns: repeat(4, 1fr);
             grid-gap: 15px;
             width: 100%;
-            max-width: 460px;
+            height: 100%;
             position: relative;
         }
         
         .cell {
-            width: 100%;
-            aspect-ratio: 1 / 1;
             background: rgba(238, 228, 218, 0.35);
             border-radius: 5px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2rem;
-            font-weight: bold;
-            color: #776e65;
+            position: relative;
         }
         
         .tile {
             position: absolute;
-            width: 100px;
-            height: 100px;
+            width: calc(25% - 11.25px);
+            height: calc(25% - 11.25px);
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 45px;
+            font-size: 35px;
             font-weight: bold;
             border-radius: 5px;
             background: #eee4da;
-            transition: all 0.1s;
+            transition: all 0.1s ease-in-out;
+            z-index: 10;
         }
         
         .tile-2 { background: #eee4da; }
@@ -129,11 +121,11 @@
         .tile-16 { background: #f59563; color: white; }
         .tile-32 { background: #f67c5f; color: white; }
         .tile-64 { background: #f65e3b; color: white; }
-        .tile-128 { background: #edcf72; color: white; font-size: 40px; }
-        .tile-256 { background: #edcc61; color: white; font-size: 40px; }
-        .tile-512 { background: #edc850; color: white; font-size: 40px; }
-        .tile-1024 { background: #edc53f; color: white; font-size: 35px; }
-        .tile-2048 { background: #edc22e; color: white; font-size: 35px; }
+        .tile-128 { background: #edcf72; color: white; font-size: 30px; }
+        .tile-256 { background: #edcc61; color: white; font-size: 30px; }
+        .tile-512 { background: #edc850; color: white; font-size: 30px; }
+        .tile-1024 { background: #edc53f; color: white; font-size: 25px; }
+        .tile-2048 { background: #edc22e; color: white; font-size: 25px; }
         
         .game-over {
             position: fixed;
@@ -157,15 +149,9 @@
 
         @media (max-width: 500px) {
             h1 { font-size: 40px; }
-            .tile, .cell { 
-                width: 70px; 
-                height: 70px; 
-                font-size: 24px; 
-            }
-            .score-box {
-                padding: 5px 10px;
-                min-width: 50px;
-            }
+            .tile { font-size: 24px; }
+            .tile-128, .tile-256, .tile-512 { font-size: 22px; }
+            .tile-1024, .tile-2048 { font-size: 18px; }
         }
     </style>
 </head>
@@ -212,6 +198,7 @@
         const tryAgainBtn = document.getElementById('try-again-btn');
         const gameOverElement = document.getElementById('game-over');
         const gameOverTextElement = document.getElementById('game-over-text');
+        const gridContainer = document.querySelector('.grid-container');
         
         // Initialize Game
         function initGame() {
@@ -226,8 +213,6 @@
                 for (let col = 0; col < 4; col++) {
                     const cell = document.createElement('div');
                     cell.className = 'cell';
-                    cell.dataset.row = row;
-                    cell.dataset.col = col;
                     gridElement.appendChild(cell);
                 }
             }
@@ -261,23 +246,31 @@
             if (emptyCells.length > 0) {
                 const { row, col } = emptyCells[Math.floor(Math.random() * emptyCells.length)];
                 grid[row][col] = Math.random() < 0.9 ? 2 : 4;
-                
-                // Create tile
-                const tile = document.createElement('div');
-                tile.className = `tile tile-${grid[row][col]}`;
-                tile.textContent = grid[row][col];
-                tile.dataset.row = row;
-                tile.dataset.col = col;
-                
-                // Calculate position based on cell size
-                const cellSize = gridElement.offsetWidth / 4;
-                tile.style.width = `${cellSize - 15}px`;
-                tile.style.height = `${cellSize - 15}px`;
-                tile.style.top = `${row * (cellSize + 15) + 15}px`;
-                tile.style.left = `${col * (cellSize + 15) + 15}px`;
-                
-                gridElement.appendChild(tile);
+                createTile(row, col, grid[row][col]);
             }
+        }
+        
+        // Create tile element
+        function createTile(row, col, value) {
+            const tile = document.createElement('div');
+            tile.className = `tile tile-${value}`;
+            tile.textContent = value;
+            tile.dataset.row = row;
+            tile.dataset.col = col;
+            
+            // Calculate position
+            const cellSize = gridContainer.offsetWidth / 4;
+            const tileSize = cellSize - 15;
+            const posX = col * cellSize + 15;
+            const posY = row * cellSize + 15;
+            
+            tile.style.width = `${tileSize}px`;
+            tile.style.height = `${tileSize}px`;
+            tile.style.left = `${posX}px`;
+            tile.style.top = `${posY}px`;
+            
+            gridContainer.appendChild(tile);
+            return tile;
         }
         
         // Update the score display
@@ -391,7 +384,8 @@
             tiles.forEach(tile => tile.remove());
             
             // Create new tiles based on current grid
-            const cellSize = gridElement.offsetWidth / 4;
+            const cellSize = gridContainer.offsetWidth / 4;
+            const tileSize = cellSize - 15;
             
             for (let row = 0; row < 4; row++) {
                 for (let col = 0; col < 4; col++) {
@@ -399,25 +393,25 @@
                         const tile = document.createElement('div');
                         tile.className = `tile tile-${grid[row][col]}`;
                         tile.textContent = grid[row][col];
-                        tile.dataset.row = row;
-                        tile.dataset.col = col;
                         
-                        // Set dynamic size and position
-                        tile.style.width = `${cellSize - 15}px`;
-                        tile.style.height = `${cellSize - 15}px`;
-                        tile.style.top = `${row * (cellSize + 15) + 15}px`;
-                        tile.style.left = `${col * (cellSize + 15) + 15}px`;
+                        // Calculate position
+                        const posX = col * cellSize + 15;
+                        const posY = row * cellSize + 15;
                         
-                        // Adjust font size for smaller screens
-                        if (window.innerWidth <= 500) {
-                            if (grid[row][col] >= 128) {
-                                tile.style.fontSize = '24px';
-                            } else {
-                                tile.style.fontSize = '30px';
-                            }
+                        tile.style.width = `${tileSize}px`;
+                        tile.style.height = `${tileSize}px`;
+                        tile.style.left = `${posX}px`;
+                        tile.style.top = `${posY}px`;
+                        
+                        // Adjust font size for smaller numbers
+                        if (grid[row][col] >= 128) {
+                            tile.style.fontSize = '30px';
+                        }
+                        if (grid[row][col] >= 1024) {
+                            tile.style.fontSize = '25px';
                         }
                         
-                        gridElement.appendChild(tile);
+                        gridContainer.appendChild(tile);
                     }
                 }
             }
@@ -493,28 +487,23 @@
             }
         });
         
-        // Improved Touch controls for mobile
+        // Touch controls
         let touchStartX = 0;
         let touchStartY = 0;
         let touchEndX = 0;
         let touchEndY = 0;
         
-        // Touch start handler
-        document.addEventListener('touchstart', function(e) {
-            e.preventDefault();
+        gridContainer.addEventListener('touchstart', function(e) {
             touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
-        }, { passive: false });
+        }, { passive: true });
         
-        // Touch end handler
-        document.addEventListener('touchend', function(e) {
-            e.preventDefault();
+        gridContainer.addEventListener('touchend', function(e) {
             touchEndX = e.changedTouches[0].clientX;
             touchEndY = e.changedTouches[0].clientY;
             handleSwipe();
-        }, { passive: false });
+        }, { passive: true });
         
-        // Handle swipe direction
         function handleSwipe() {
             const dx = touchEndX - touchStartX;
             const dy = touchEndY - touchStartY;
