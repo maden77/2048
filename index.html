@@ -2,21 +2,35 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2048 Fixed Version</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <meta name="theme-color" content="#faf8ef">
+    <title>2048 Game</title>
+    <link rel="manifest" href="manifest.json">
     <style>
-        body {
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
             font-family: Arial, sans-serif;
             background: #faf8ef;
-            text-align: center;
-            margin: 0;
-            padding: 20px;
             touch-action: none;
+            overflow: hidden;
+        }
+        
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
         }
         
         .header {
             display: flex;
             justify-content: space-between;
+            width: 100%;
             max-width: 500px;
             margin: 0 auto 20px;
         }
@@ -71,24 +85,27 @@
             border-radius: 6px;
             padding: 15px;
             display: inline-block;
+            margin: auto;
         }
         
         .grid {
             display: grid;
-            grid-template-columns: repeat(4, 100px);
+            grid-template-columns: repeat(4, 1fr);
             grid-gap: 15px;
+            width: 100%;
+            max-width: 460px;
             position: relative;
         }
         
         .cell {
-            width: 100px;
-            height: 100px;
+            width: 100%;
+            aspect-ratio: 1 / 1;
             background: rgba(238, 228, 218, 0.35);
             border-radius: 5px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 45px;
+            font-size: 2rem;
             font-weight: bold;
             color: #776e65;
         }
@@ -137,6 +154,19 @@
             font-size: 60px;
             color: #776e65;
             margin-bottom: 20px;
+        }
+
+        @media (max-width: 500px) {
+            h1 { font-size: 40px; }
+            .tile, .cell { 
+                width: 70px; 
+                height: 70px; 
+                font-size: 24px; 
+            }
+            .score-box {
+                padding: 5px 10px;
+                min-width: 50px;
+            }
         }
     </style>
 </head>
@@ -239,8 +269,14 @@
                 tile.textContent = grid[row][col];
                 tile.dataset.row = row;
                 tile.dataset.col = col;
-                tile.style.top = `${row * 115 + 15}px`;
-                tile.style.left = `${col * 115 + 15}px`;
+                
+                // Calculate position based on cell size
+                const cellSize = gridElement.offsetWidth / 4;
+                tile.style.width = `${cellSize - 15}px`;
+                tile.style.height = `${cellSize - 15}px`;
+                tile.style.top = `${row * (cellSize + 15) + 15}px`;
+                tile.style.left = `${col * (cellSize + 15) + 15}px`;
+                
                 gridElement.appendChild(tile);
             }
         }
@@ -356,6 +392,8 @@
             tiles.forEach(tile => tile.remove());
             
             // Create new tiles based on current grid
+            const cellSize = gridElement.offsetWidth / 4;
+            
             for (let row = 0; row < 4; row++) {
                 for (let col = 0; col < 4; col++) {
                     if (grid[row][col] !== 0) {
@@ -364,8 +402,22 @@
                         tile.textContent = grid[row][col];
                         tile.dataset.row = row;
                         tile.dataset.col = col;
-                        tile.style.top = `${row * 115 + 15}px`;
-                        tile.style.left = `${col * 115 + 15}px`;
+                        
+                        // Set dynamic size and position
+                        tile.style.width = `${cellSize - 15}px`;
+                        tile.style.height = `${cellSize - 15}px`;
+                        tile.style.top = `${row * (cellSize + 15) + 15}px`;
+                        tile.style.left = `${col * (cellSize + 15) + 15}px`;
+                        
+                        // Adjust font size for smaller screens
+                        if (window.innerWidth <= 500) {
+                            if (grid[row][col] >= 128) {
+                                tile.style.fontSize = '24px';
+                            } else {
+                                tile.style.fontSize = '30px';
+                            }
+                        }
+                        
                         gridElement.appendChild(tile);
                     }
                 }
@@ -471,6 +523,18 @@
             touchStartX = null;
             touchStartY = null;
         }, { passive: true });
+        
+        // Prevent pull-to-refresh and other swipe gestures
+        document.addEventListener('touchmove', function (e) {
+            if (gameActive) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
+        // Initialize PWA service worker
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("service-worker.js");
+        }
         
         // Initialize the game
         initGame();
