@@ -112,6 +112,7 @@
   </style>
 </head>
 <body>
+  <audio id="merge-sound" src="https://cdn.jsdelivr.net/gh/sindresorhus/2048@gh-pages/sounds/merge.mp3" preload="auto"></audio>
   <div class="header">
     <h1>2048</h1>
     <div class="scores">
@@ -210,7 +211,7 @@
       filtered[i] *= 2;
       filtered[i + 1] = 0;
       score += filtered[i];
-      playSound(); // 🔊 mainkan suara
+      document.getElementById('merge-sound').play(); // 🔊 mainkan suara
     }
   }
   filtered = filtered.filter(n => n);
