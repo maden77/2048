@@ -295,6 +295,23 @@
   o.start();
   o.stop(a.currentTime + 0.1); // durasi 100ms
     }
+    let audioCtx;
+
+function playSound() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const oscillator = audioCtx.createOscillator();
+  const gainNode = audioCtx.createGain();
+
+  oscillator.type = 'sine';
+  oscillator.frequency.setValueAtTime(500 + Math.random() * 300, audioCtx.currentTime); // 500-800 Hz
+  gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime); // volume kecil
+
+  oscillator.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+
+  oscillator.start();
+  oscillator.stop(audioCtx.currentTime + 0.1);
+}
   </script>
 </body>
 </html>
