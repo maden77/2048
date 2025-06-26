@@ -307,19 +307,34 @@ function playSound() {
 }
     const mergeSound = document.getElementById("merge-sound");
 
-// iOS/Chrome membutuhkan interaksi untuk aktivasi
-function unlockAudio() {
-  mergeSound.muted = false;
-  mergeSound.play().then(() => {
-    mergeSound.pause();
-    mergeSound.currentTime = 0;
-  }).catch(() => {});
-  window.removeEventListener('click', unlockAudio);
-  window.removeEventListener('touchstart', unlockAudio);
+// Fungsi aktivasi audio
+function activateAudio() {
+  mergeSound.muted = false; // Pastikan tidak muted
+  mergeSound.currentTime = 0; // Reset ke awal
+  mergeSound.play()
+    .then(() => {
+      mergeSound.pause();
+      mergeSound.currentTime = 0;
+    })
+    .catch(e => console.log("Audio activation error:", e));
 }
 
-window.addEventListener('click', unlockAudio, { once: true });
-window.addEventListener('touchstart', unlockAudio, { once: true });
+// Trigger untuk desktop dan mobile
+window.addEventListener('click', activateAudio, { once: true });
+window.addEventListener('touchstart', activateAudio, { once: true });
+
+// Pemakaian saat merge tile
+function playMergeSound() {
+  mergeSound.currentTime = 0;
+  mergeSound.play().catch(e => console.log("Play failed:", e));
+}
+
+// Contoh pemanggilan di processLine():
+if (filtered[i] === filtered[i + 1]) {
+  playMergeSound(); // Gantikan document.getElementById(...).play()
+}
+    const mergeSound = document.getElementById("merge-sound");
+
   </script>
 </body>
 </html>
