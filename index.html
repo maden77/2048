@@ -334,6 +334,39 @@ function playSound() {
     mergeSound.currentTime = 0;
     mergeSound.play().catch(e => console.log("Play failed:", e));
   }
+    const mergeSound = document.getElementById("merge-sound");
+const moveSound = document.getElementById("move-sound");
+const overSound = document.getElementById("over-sound");
+
+// Fungsi aktivasi audio agar dapat digunakan oleh browser
+function activateAudio() {
+  [mergeSound, moveSound, overSound].forEach(sound => {
+    sound.muted = false;
+    sound.currentTime = 0;
+    sound.play().then(() => {
+      sound.pause();
+      sound.currentTime = 0;
+    }).catch(e => console.log("Audio activation error:", e));
+  });
+}
+
+// Fungsi-fungsi khusus untuk play
+function playMergeSound() {
+  mergeSound.currentTime = 0;
+  mergeSound.play().catch(e => console.log("Play failed:", e));
+}
+function playMoveSound() {
+  moveSound.currentTime = 0;
+  moveSound.play().catch(e => console.log("Play failed:", e));
+}
+function playOverSound() {
+  overSound.currentTime = 0;
+  overSound.play().catch(e => console.log("Play failed:", e));
+}
+
+// Trigger hanya sekali saat pertama kali pengguna klik/tap
+window.addEventListener('click', activateAudio, { once: true });
+window.addEventListener('touchstart', activateAudio, { once: true });
 // Contoh pemanggilan di processLine():
 if (filtered[i] === filtered[i + 1]) {
   playMergeSound(); // Gantikan document.getElementById(...).play()
