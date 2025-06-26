@@ -112,7 +112,10 @@
   </style>
 </head>
 <body>
-  <audio id="merge-sound" src="https://freesound.org/data/previews/341/341695_5260877-lq.mp3" preload="auto"></audio>
+  <audio id="merge-sound" src="https://freesound.org/data/previews/511/511919_1667046-lq.mp3" preload="auto"></audio>  
+  <audio id="move-sound" src="https://freesound.org/data/previews/612/612092_1648170-lq.mp3" preload="auto"></audio>
+  <audio id="over-sound" src="https://freesound.org/data/previews/385/385050_5121236-lq.mp3"preload="auto"></audio>
+  
   <div class="header">
     <h1>2048</h1>
     <div class="scores">
@@ -305,30 +308,35 @@ function playSound() {
   oscillator.start();
   oscillator.stop(audioCtx.currentTime + 0.1);
 }
-    const mergeSound = document.getElementById("merge-sound");
+  
 
-// Fungsi aktivasi audio
-function activateAudio() {
-  mergeSound.muted = false; // Pastikan tidak muted
-  mergeSound.currentTime = 0; // Reset ke awal
-  mergeSound.play()
-    .then(() => {
-      mergeSound.pause();
-      mergeSound.currentTime = 0;
-    })
-    .catch(e => console.log("Audio activation error:", e));
-}
+<script>
+  // Ambil elemen audio
+  const mergeSound = document.getElementById("merge-sound");
+  const moveSound = document.getElementById("move-sound");
+  const overSound = document.getElementById("over-sound");
 
-// Trigger untuk desktop dan mobile
-window.addEventListener('click', activateAudio, { once: true });
-window.addEventListener('touchstart', activateAudio, { once: true });
+  // Fungsi untuk mengaktifkan audio pertama kali (agar diizinkan browser)
+  function activateAudio() {
+    [mergeSound, moveSound, overSound].forEach(sound => {
+      sound.muted = false;
+      sound.currentTime = 0;
+      sound.play().then(() => {
+        sound.pause();
+        sound.currentTime = 0;
+      }).catch(e => console.log("Audio activation error:", e));
+    });
+  }
 
-// Pemakaian saat merge tile
-function playMergeSound() {
-  mergeSound.currentTime = 0;
-  mergeSound.play().catch(e => console.log("Play failed:", e));
-}
+  // Trigger hanya sekali saat pertama kali pengguna klik/tap
+  window.addEventListener('click', activateAudio, { once: true });
+  window.addEventListener('touchstart', activateAudio, { once: true });
 
+  // Fungsi untuk memutar mergeSound
+  function playMergeSound() {
+    mergeSound.currentTime = 0;
+    mergeSound.play().catch(e => console.log("Play failed:", e));
+  }
 // Contoh pemanggilan di processLine():
 if (filtered[i] === filtered[i + 1]) {
   playMergeSound(); // Gantikan document.getElementById(...).play()
