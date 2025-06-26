@@ -162,13 +162,7 @@
       updateScore();
       addRandomTile(); addRandomTile();
       updateTiles();
-  if (!audioCtx) {
-    window.addEventListener('touchstart', () => playSound(), { once: true });
-    window.addEventListener('click', () => playSound(), { once: true });
-                            }
-    }
-
-    function updateScore() {
+   function updateScore() {
       scoreElement.textContent = score;
       if (score > bestScore) {
         bestScore = score;
@@ -367,11 +361,6 @@ function playOverSound() {
 // Trigger hanya sekali saat pertama kali pengguna klik/tap
 window.addEventListener('click', activateAudio, { once: true });
 window.addEventListener('touchstart', activateAudio, { once: true });
-// Contoh pemanggilan di processLine():
-if (filtered[i] === filtered[i + 1]) {
-  playMergeSound(); // Gantikan document.getElementById(...).play()
-}
-    const mergeSound = document.getElementById("merge-sound");
 
   </script>
 </body>
