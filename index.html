@@ -8,8 +8,9 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon2048-192x192.png" sizes="192x192">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* Gaya game tetap sama seperti sebelumnya */
     body {
+      margin: 0;
       font-family: Arial, sans-serif;
       background: #faf8ef;
       display: flex;
@@ -19,114 +20,29 @@
       height: 100vh;
       overflow: hidden;
     }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      max-width: 500px;
-      margin-bottom: 20px;
-    }
-    h1 { font-size: 60px; color: #776e65; }
-    .scores {
-      display: flex;
-      gap: 10px;
-    }
-    .score-box {
-      background: #bbada0;
-      color: white;
-      padding: 10px 15px;
-      border-radius: 5px;
-      text-align: center;
-      min-width: 60px;
-    }
-    .score-title { font-size: 12px; color: #eee4da; }
-    .score-value { font-size: 20px; font-weight: bold; }
-    .controls { margin-bottom: 20px; }
-    button {
-      background: #8f7a66;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      padding: 10px 15px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .grid-container {
-      background: #bbada0;
-      border-radius: 6px;
-      padding: 15px;
-      position: relative;
-      width: calc(100vw - 40px);
-      max-width: 500px;
-      aspect-ratio: 1/1;
-      touch-action: none;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      grid-gap: 15px;
-      width: 100%;
-      height: 100%;
-    }
-    .cell {
-      background: rgba(238, 228, 218, 0.35);
-      border-radius: 5px;
-    }
-    .tile {
-      position: absolute;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 35px;
-      font-weight: bold;
-      border-radius: 5px;
-      transition: 0.1s ease-in-out;
-      z-index: 10;
-    }
-    .tile-2 { background: #eee4da; }
-    .tile-4 { background: #ede0c8; }
-    .tile-8 { background: #f2b179; color: white; }
-    .tile-16 { background: #f59563; color: white; }
-    .tile-32 { background: #f67c5f; color: white; }
-    .tile-64 { background: #f65e3b; color: white; }
-    .tile-128 { background: #edcf72; color: white; font-size: 30px; }
-    .tile-256 { background: #edcc61; color: white; font-size: 30px; }
-    .tile-512 { background: #edc850; color: white; font-size: 30px; }
-    .tile-1024 { background: #edc53f; color: white; font-size: 25px; }
-    .tile-2048 { background: #edc22e; color: white; font-size: 25px; }
-    .game-over {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(238, 228, 218, 0.9);
-      display: none;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 100;
-    }
-    .game-over h2 {
-      font-size: 60px;
-      color: #776e65;
-      margin-bottom: 20px;
-    }
+    .header, .controls, .grid-container, .game-over { width: 100%; max-width: 500px; }
+    .header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+    h1 { font-size: 60px; color: #776e65; margin: 0; }
+    .score-box { background: #bbada0; padding: 10px 15px; color: white; border-radius: 5px; text-align: center; }
+    .grid-container { background: #bbada0; border-radius: 6px; padding: 15px; position: relative; aspect-ratio: 1/1; touch-action: none; }
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; height: 100%; }
+    .cell { background: rgba(238,228,218,0.35); border-radius: 5px; }
+    .tile { position: absolute; display: flex; justify-content: center; align-items: center; font-size: 35px; font-weight: bold; border-radius: 5px; transition: 0.1s; }
+    .game-over { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(238,228,218,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
   </style>
 </head>
 <body>
-  <audio id="merge-sound" src="https://cdn.jsdelivr.net/gh/jwilson8767/javascript-2048/sounds/merge.mp3" preload="auto"></audio>
-<audio id="move-sound" src="https://cdn.jsdelivr.net/gh/jwilson8767/javascript-2048/sounds/move.mp3" preload="auto"></audio>
-<audio id="over-sound" src="https://cdn.jsdelivr.net/gh/jwilson8767/javascript-2048/sounds/gameover.mp3" preload="auto"></audio>
-  
+  <!-- Suara -->
+  <audio id="merge-sound" src="https://freesound.org/data/previews/511/511919_1667046-lq.mp3" preload="auto"></audio>
+  <audio id="move-sound" src="https://freesound.org/data/previews/612/612092_1648170-lq.mp3" preload="auto"></audio>
+  <audio id="over-sound" src="https://freesound.org/data/previews/385/385050_5121236-lq.mp3" preload="auto"></audio>
+
+  <!-- Tampilan -->
   <div class="header">
     <h1>2048</h1>
-    <div class="scores">
-      <div class="score-box">
-        <div class="score-title">SCORE</div>
-        <div class="score-value" id="score">0</div>
-      </div>
-      <div class="score-box">
-        <div class="score-title">BEST</div>
-        <div class="score-value" id="best">0</div>
-      </div>
+    <div>
+      <div class="score-box"><div>SCORE</div><div id="score">0</div></div>
+      <div class="score-box"><div>BEST</div><div id="best">0</div></div>
     </div>
   </div>
   <div class="controls">
@@ -141,6 +57,7 @@
   </div>
 
   <script>
+    // Data
     let grid = [], score = 0, bestScore = localStorage.getItem('bestScore') || 0, gameActive = true;
     const gridElement = document.getElementById('grid'),
           gridContainer = document.getElementById('grid-container'),
@@ -149,6 +66,28 @@
           gameOverElement = document.getElementById('game-over'),
           gameOverText = document.getElementById('game-over-text');
 
+    // Audio
+    const mergeSound = document.getElementById("merge-sound");
+    const moveSound = document.getElementById("move-sound");
+    const overSound = document.getElementById("over-sound");
+
+    function playMergeSound() { mergeSound.currentTime = 0; mergeSound.play().catch(() => {}); }
+    function playMoveSound() { moveSound.currentTime = 0; moveSound.play().catch(() => {}); }
+    function playOverSound() { overSound.currentTime = 0; overSound.play().catch(() => {}); }
+
+    function activateAudio() {
+      [mergeSound, moveSound, overSound].forEach(sound => {
+        sound.muted = false;
+        sound.play().then(() => {
+          sound.pause(); sound.currentTime = 0;
+        }).catch(() => {});
+      });
+    }
+
+    window.addEventListener('click', activateAudio, { once: true });
+    window.addEventListener('touchstart', activateAudio, { once: true });
+
+    // Game Logic
     function initGame() {
       grid = Array(4).fill().map(() => Array(4).fill(0));
       gridElement.innerHTML = '';
@@ -157,27 +96,28 @@
         cell.className = 'cell';
         gridElement.appendChild(cell);
       }
-      score = 0; gameActive = true;
+      score = 0;
+      gameActive = true;
       gameOverElement.style.display = 'none';
       updateScore();
       addRandomTile(); addRandomTile();
       updateTiles();
-   function updateScore() {
+    }
+
+    function updateScore() {
       scoreElement.textContent = score;
       if (score > bestScore) {
         bestScore = score;
-        bestElement.textContent = bestScore;
         localStorage.setItem('bestScore', bestScore);
-      } else {
-        bestElement.textContent = bestScore;
       }
+      bestElement.textContent = bestScore;
     }
 
     function addRandomTile() {
       const empty = [];
       for (let r = 0; r < 4; r++)
         for (let c = 0; c < 4; c++)
-          if (grid[r][c] === 0) empty.push({ r, c });
+          if (!grid[r][c]) empty.push({ r, c });
       if (empty.length) {
         const { r, c } = empty[Math.floor(Math.random() * empty.length)];
         grid[r][c] = Math.random() < 0.9 ? 2 : 4;
@@ -185,7 +125,7 @@
     }
 
     function updateTiles() {
-      document.querySelectorAll('.tile').forEach(t => t.remove());
+      document.querySelectorAll('.tile').forEach(e => e.remove());
       const gap = 15, tileSize = (gridContainer.offsetWidth - gap * 5) / 4;
       for (let r = 0; r < 4; r++)
         for (let c = 0; c < 4; c++)
@@ -202,20 +142,20 @@
     }
 
     function processLine(line) {
-  let filtered = line.filter(n => n);
-  for (let i = 0; i < filtered.length - 1; i++) {
-    if (filtered[i] === filtered[i + 1]) {
-      filtered[i] *= 2;
-      filtered[i + 1] = 0;
-      score += filtered[i];
-      document.getElementById('merge-sound').play(); // 🔊 mainkan suara
-    }
-  }
-  filtered = filtered.filter(n => n);
-  return [...filtered, ...Array(4 - filtered.length).fill(0)];
+      let filtered = line.filter(n => n);
+      for (let i = 0; i < filtered.length - 1; i++) {
+        if (filtered[i] === filtered[i + 1]) {
+          filtered[i] *= 2;
+          filtered[i + 1] = 0;
+          score += filtered[i];
+          playMergeSound();
+        }
+      }
+      filtered = filtered.filter(n => n);
+      return [...filtered, ...Array(4 - filtered.length).fill(0)];
     }
 
-      function moveTiles(dir) {
+    function moveTiles(dir) {
       if (!gameActive) return;
       const old = JSON.stringify(grid);
       if (dir === 'up' || dir === 'down') {
@@ -238,14 +178,18 @@
       if (JSON.stringify(grid) !== old) {
         addRandomTile();
         updateTiles();
-        if (checkGameOver()) showGameOver();
+        playMoveSound();
+        if (checkGameOver()) {
+          showGameOver();
+          playOverSound();
+        }
       }
     }
 
     function checkGameOver() {
       for (let r = 0; r < 4; r++)
         for (let c = 0; c < 4; c++) {
-          if (grid[r][c] === 0) return false;
+          if (!grid[r][c]) return false;
           if (c < 3 && grid[r][c] === grid[r][c + 1]) return false;
           if (r < 3 && grid[r][c] === grid[r + 1][c]) return false;
         }
@@ -254,7 +198,6 @@
 
     function showGameOver() {
       gameActive = false;
-      gameOverText.textContent = 'Game Over!';
       gameOverElement.style.display = 'flex';
     }
 
@@ -264,7 +207,8 @@
     document.addEventListener('keydown', e => {
       const key = e.key.replace('Arrow', '').toLowerCase();
       if (['up', 'down', 'left', 'right'].includes(key)) {
-        e.preventDefault(); moveTiles(key);
+        e.preventDefault();
+        moveTiles(key);
       }
     });
 
@@ -285,83 +229,6 @@
       navigator.serviceWorker.register('sw.js');
 
     window.addEventListener('load', () => setTimeout(initGame, 100));
-    
-    let audioCtx;
-function playSound() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  const oscillator = audioCtx.createOscillator();
-  const gainNode = audioCtx.createGain();
-
-  oscillator.type = 'sine';
-  oscillator.frequency.setValueAtTime(500 + Math.random() * 300, audioCtx.currentTime); // 500-800 Hz
-  gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime); // volume kecil
-
-  oscillator.connect(gainNode);
-  gainNode.connect(audioCtx.destination);
-
-  oscillator.start();
-  oscillator.stop(audioCtx.currentTime + 0.1);
-}
-  // Ambil elemen audio
-  const mergeSound = document.getElementById("merge-sound");
-  const moveSound = document.getElementById("move-sound");
-  const overSound = document.getElementById("over-sound");
-
-  // Fungsi untuk mengaktifkan audio pertama kali (agar diizinkan browser)
-  function activateAudio() {
-    [mergeSound, moveSound, overSound].forEach(sound => {
-      sound.muted = false;
-      sound.currentTime = 0;
-      sound.play().then(() => {
-        sound.pause();
-        sound.currentTime = 0;
-      }).catch(e => console.log("Audio activation error:", e));
-    });
-  }
-
-  // Trigger hanya sekali saat pertama kali pengguna klik/tap
-  window.addEventListener('click', activateAudio, { once: true });
-  window.addEventListener('touchstart', activateAudio, { once: true });
-
-  // Fungsi untuk memutar mergeSound
-  function playMergeSound() {
-    mergeSound.currentTime = 0;
-    mergeSound.play().catch(e => console.log("Play failed:", e));
-  }
-    const mergeSound = document.getElementById("merge-sound");
-const moveSound = document.getElementById("move-sound");
-const overSound = document.getElementById("over-sound");
-
-// Fungsi aktivasi audio agar dapat digunakan oleh browser
-function activateAudio() {
-  [mergeSound, moveSound, overSound].forEach(sound => {
-    sound.muted = false;
-    sound.currentTime = 0;
-    sound.play().then(() => {
-      sound.pause();
-      sound.currentTime = 0;
-    }).catch(e => console.log("Audio activation error:", e));
-  });
-}
-
-// Fungsi-fungsi khusus untuk play
-function playMergeSound() {
-  mergeSound.currentTime = 0;
-  mergeSound.play().catch(e => console.log("Play failed:", e));
-}
-function playMoveSound() {
-  moveSound.currentTime = 0;
-  moveSound.play().catch(e => console.log("Play failed:", e));
-}
-function playOverSound() {
-  overSound.currentTime = 0;
-  overSound.play().catch(e => console.log("Play failed:", e));
-}
-
-// Trigger hanya sekali saat pertama kali pengguna klik/tap
-window.addEventListener('click', activateAudio, { once: true });
-window.addEventListener('touchstart', activateAudio, { once: true });
-
   </script>
 </body>
 </html>
