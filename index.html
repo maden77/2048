@@ -288,16 +288,8 @@
       navigator.serviceWorker.register('sw.js');
 
     window.addEventListener('load', () => setTimeout(initGame, 100));
-    function playSound() {
-  const a = new AudioContext();
-  const o = a.createOscillator();
-  o.connect(a.destination);
-  o.frequency.value = 400 + Math.random() * 200; // frekuensi acak 400–600Hz
-  o.start();
-  o.stop(a.currentTime + 0.1); // durasi 100ms
-    }
+    
     let audioCtx;
-
 function playSound() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   const oscillator = audioCtx.createOscillator();
