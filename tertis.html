@@ -1,28 +1,39 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>2048 Tetris Mode</title>
+  <title>2048 Mode Tetris</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
-      font-family: sans-serif;
+      font-family: 'Arial', sans-serif;
       background: #faf8ef;
       display: flex;
       flex-direction: column;
       align-items: center;
       margin: 0;
+      padding: 20px;
+      height: 100vh;
+      box-sizing: border-box;
     }
     h1 {
-      margin: 20px;
+      margin: 10px 0;
+      color: #776e65;
+    }
+    .game-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     canvas {
       border: 4px solid #bbada0;
       background: #eee4da;
+      margin-bottom: 10px;
     }
     #score {
       font-size: 24px;
       margin: 10px;
+      color: #776e65;
     }
     button {
       margin-top: 10px;
@@ -32,36 +43,79 @@
       color: white;
       border: none;
       border-radius: 10px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #9f8b77;
+    }
+    .controls {
+      margin-top: 10px;
+      text-align: center;
+      color: #776e65;
+    }
+    .game-over {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(238, 228, 218, 0.9);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .game-over-content {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
     }
   </style>
-  <link rel="manifest" href="manifest.json" >
+  <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon2048-192x192.png" sizes="192x192">
-  
-<meta name="theme-color" content="#bbada0">
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js');
-  }
-</script>
+  <meta name="theme-color" content="#bbada0">
 </head>
 <body>
-  <h1>2048 Tetris</h1>
-  <div id="score">Score: 0</div>
-  <canvas id="game" width="200" height="400"></canvas>
-  <button onclick="startGame()">Main Lagi</button>
+  <div class="game-container">
+    <h1>2048 Tetris</h1>
+    <div id="score">Skor: 0</div>
+    <canvas id="game" width="200" height="400"></canvas>
+    <button onclick="mulaiPermainan()">Main Lagi</button>
+    <div class="controls">
+      <p>Gunakan tombol ← → untuk gerak, ↓ untuk jatuh lebih cepat</p>
+    </div>
+  </div>
+
+  <div class="game-over" id="game-over">
+    <div class="game-over-content">
+      <h2>Game Over!</h2>
+      <p id="final-score">Skor akhir: 0</p>
+      <button onclick="mulaiPermainan()">Coba Lagi</button>
+    </div>
+  </div>
 
   <script>
+    // Elemen game
     const canvas = document.getElementById('game');
     const ctx = canvas.getContext('2d');
+    const gameOverElement = document.getElementById('game-over');
+    const finalScoreElement = document.getElementById('final-score');
+    
+    // Pengaturan game
     const cols = 4;
     const rows = 8;
     const size = 50;
-    const board = [];
-    let current = null;
-    let dropInterval = 1000;
-    let score = 0;
+    let papan = Array(rows).fill().map(() => Array(cols).fill(0));
+    let potonganSekarang = null;
+    let skor = 0;
+    let intervalGame;
+    let kecepatanGame = 800;
+    let gameBerakhir = false;
 
-    const colors = {
+    // Warna untuk angka
+    const warna = {
       2: '#eee4da',
       4: '#ede0c8',
       8: '#f2b179',
@@ -75,109 +129,216 @@
       2048: '#edc22e'
     };
 
-    function drawCell(x, y, val) {
-      ctx.fillStyle = colors[val] || '#ccc0b3';
+    // Fungsi untuk menggambar sel
+    function gambarSel(x, y, nilai) {
+      ctx.fillStyle = warna[nilai] || '#ccc0b3';
       ctx.fillRect(x * size, y * size, size, size);
       ctx.strokeStyle = '#bbada0';
       ctx.strokeRect(x * size, y * size, size, size);
-      if (val) {
-        ctx.fillStyle = val <= 4 ? '#776e65' : 'white';
-        ctx.font = 'bold 20px sans-serif';
+      if (nilai) {
+        ctx.fillStyle = nilai <= 4 ? '#776e65' : 'white';
+        ctx.font = 'bold 20px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(val, x * size + size / 2, y * size + size / 2);
+        ctx.fillText(nilai, x * size + size / 2, y * size + size / 2);
       }
     }
 
-    function draw() {
+    // Fungsi untuk menggambar seluruh game
+    function gambarGame() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Gambar papan
       for (let y = 0; y < rows; y++) {
         for (let x = 0; x < cols; x++) {
-          drawCell(x, y, board[y][x]);
+          gambarSel(x, y, papan[y][x]);
         }
       }
-      if (current) drawCell(current.x, current.y, current.value);
+      
+      // Gambar potongan yang sedang jatuh
+      if (potonganSekarang) {
+        gambarSel(potonganSekarang.x, potonganSekarang.y, potonganSekarang.nilai);
+      }
     }
 
-    function mergeDown() {
+    // Buat potongan baru
+    function buatPotongan() {
+      return {
+        x: Math.floor(Math.random() * cols),
+        y: 0,
+        nilai: Math.random() < 0.9 ? 2 : 4
+      };
+    }
+
+    // Cek apakah gerakan valid
+    function gerakanValid(x, y) {
+      return x >= 0 && x < cols && y < rows && papan[y][x] === 0;
+    }
+
+    // Letakkan potongan ke papan
+    function letakkanPotongan() {
+      if (!potonganSekarang) return;
+      
+      // Cek jika game over (tidak bisa letakkan di atas)
+      if (potonganSekarang.y === 0 && papan[potonganSekarang.y][potonganSekarang.x] !== 0) {
+        gameOver();
+        return;
+      }
+      
+      papan[potonganSekarang.y][potonganSekarang.x] = potonganSekarang.nilai;
+      gabungkanSel();
+      potonganSekarang = buatPotongan();
+    }
+
+    // Gabungkan sel yang sama
+    function gabungkanSel() {
+      let adaYangDigabung = false;
+      
+      // Gabungkan angka yang sama secara vertikal
+      for (let y = rows - 1; y > 0; y--) {
+        for (let x = 0; x < cols; x++) {
+          if (papan[y][x] !== 0 && papan[y][x] === papan[y-1][x]) {
+            papan[y][x] *= 2;
+            skor += papan[y][x];
+            papan[y-1][x] = 0;
+            adaYangDigabung = true;
+          }
+        }
+      }
+      
+      // Jika ada yang digabung, turunkan selnya
+      if (adaYangDigabung) {
+        turunkanSel();
+        // Cek lagi apakah bisa digabung setelah diturunkan
+        gabungkanSel();
+      }
+    }
+
+    // Turunkan sel yang ada di atas
+    function turunkanSel() {
       for (let x = 0; x < cols; x++) {
-        for (let y = rows - 2; y >= 0; y--) {
-          if (board[y][x] && board[y][x] === board[y + 1][x]) {
-            board[y + 1][x] *= 2;
-            score += board[y + 1][x];
-            board[y][x] = 0;
-            shiftDown(x, y);
+        let barisKosong = rows - 1;
+        
+        for (let y = rows - 1; y >= 0; y--) {
+          if (papan[y][x] !== 0) {
+            if (y !== barisKosong) {
+              papan[barisKosong][x] = papan[y][x];
+              papan[y][x] = 0;
+            }
+            barisKosong--;
           }
         }
       }
     }
 
-    function shiftDown(x, yStart) {
-      for (let y = yStart; y >= 0; y--) {
-        board[y + 1][x] = board[y][x];
-        board[y][x] = 0;
+    // Jatuhkan potongan
+    function jatuhkanPotongan() {
+      if (gameBerakhir) return;
+      
+      if (!potonganSekarang) {
+        potonganSekarang = buatPotongan();
       }
-    }
-
-    function drop() {
-      if (!current) return;
-      if (current.y + 1 >= rows || board[current.y + 1][current.x]) {
-        if (board[current.y][current.x]) {
-          alert('Game Over');
-          startGame();
-          return;
-        }
-        board[current.y][current.x] = current.value;
-        mergeDown();
-        current = createBlock();
+      
+      // Coba turunkan
+      if (potonganSekarang.y + 1 < rows && papan[potonganSekarang.y + 1][potonganSekarang.x] === 0) {
+        potonganSekarang.y++;
       } else {
-        current.y++;
+        letakkanPotongan();
       }
-      draw();
+      
+      gambarGame();
+      document.getElementById('score').innerText = "Skor: " + skor;
     }
 
-    function createBlock() {
-      return {
-        x: Math.floor(cols / 2),
-        y: 0,
-        value: Math.random() < 0.9 ? 2 : 4
-      };
+    // Game over
+    function gameOver() {
+      gameBerakhir = true;
+      clearInterval(intervalGame);
+      finalScoreElement.textContent = "Skor akhir: " + skor;
+      gameOverElement.style.display = "flex";
     }
 
-    function startGame() {
-      for (let y = 0; y < rows; y++) {
-        board[y] = [];
-        for (let x = 0; x < cols; x++) {
-          board[y][x] = 0;
-        }
-      }
-      score = 0;
-      document.getElementById('score').innerText = "Score: 0";
-      current = createBlock();
-      draw();
+    // Mulai permainan baru
+    function mulaiPermainan() {
+      // Bersihkan papan
+      papan = Array(rows).fill().map(() => Array(cols).fill(0));
+      skor = 0;
+      gameBerakhir = false;
+      document.getElementById('score').innerText = "Skor: 0";
+      gameOverElement.style.display = "none";
+      
+      // Buat potongan pertama
+      potonganSekarang = buatPotongan();
+      
+      // Mulai game loop
+      clearInterval(intervalGame);
+      intervalGame = setInterval(jatuhkanPotongan, kecepatanGame);
+      
+      gambarGame();
     }
 
-    function gameLoop() {
-      drop();
-      document.getElementById('score').innerText = "Score: " + score;
-    }
-
+    // Kontrol keyboard
     window.addEventListener('keydown', e => {
-      if (!current) return;
-      if (e.key === 'ArrowLeft' && current.x > 0 && !board[current.y][current.x - 1]) {
-        current.x--;
+      if (gameBerakhir) return;
+      
+      if (!potonganSekarang) return;
+      
+      switch (e.key) {
+        case 'ArrowLeft':
+          if (gerakanValid(potonganSekarang.x - 1, potonganSekarang.y)) {
+            potonganSekarang.x--;
+          }
+          break;
+        case 'ArrowRight':
+          if (gerakanValid(potonganSekarang.x + 1, potonganSekarang.y)) {
+            potonganSekarang.x++;
+          }
+          break;
+        case 'ArrowDown':
+          jatuhkanPotongan();
+          break;
       }
-      if (e.key === 'ArrowRight' && current.x < cols - 1 && !board[current.y][current.x + 1]) {
-        current.x++;
-      }
-      if (e.key === 'ArrowDown') {
-        drop();
-      }
-      draw();
+      
+      gambarGame();
     });
 
-    startGame();
-    setInterval(gameLoop, dropInterval);
+    // Kontrol sentuh untuk mobile
+    let posisiAwalSentuh = 0;
+    canvas.addEventListener('touchstart', e => {
+      posisiAwalSentuh = e.touches[0].clientX;
+      e.preventDefault();
+    }, { passive: false });
+
+    canvas.addEventListener('touchmove', e => {
+      if (!potonganSekarang || gameBerakhir) return;
+      
+      const posisiSekarang = e.touches[0].clientX;
+      const selisih = posisiSekarang - posisiAwalSentuh;
+      
+      if (selisih > 30 && gerakanValid(potonganSekarang.x + 1, potonganSekarang.y)) {
+        potonganSekarang.x++;
+        posisiAwalSentuh = posisiSekarang;
+        gambarGame();
+      } else if (selisih < -30 && gerakanValid(potonganSekarang.x - 1, potonganSekarang.y)) {
+        potonganSekarang.x--;
+        posisiAwalSentuh = posisiSekarang;
+        gambarGame();
+      }
+      
+      e.preventDefault();
+    }, { passive: false });
+
+    canvas.addEventListener('touchend', e => {
+      jatuhkanPotongan();
+    }, { passive: false });
+
+    // Inisialisasi service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+
+    // Mulai game
+    mulaiPermainan();
   </script>
 </body>
 </html>
