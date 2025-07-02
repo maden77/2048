@@ -2,7 +2,7 @@ const CACHE_NAME = '2048-pwa-v2'; // ganti versi untuk update
 const URLS_TO_CACHE = [
   '/index.html',
   '/classic.html',
-  '/tertis.html',
+  '/tetris.html',
   '/manifest.json',
   '/sw.js',
   '/icons/icon-192x192.png',
