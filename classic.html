@@ -187,8 +187,44 @@
     <h2 id="game-over-text">Game Over!</h2>
     <button id="try-again-btn">Try Again</button>
   </div>
-
-  <script>
+    <script>
+  // Perbaikan pada fungsi updateTiles
+  function updateTiles() {
+    document.querySelectorAll('.tile').forEach(e => e.remove());
+    const containerWidth = gridContainer.offsetWidth;
+    const containerHeight = gridContainer.offsetHeight;
+    const gap = 15;
+    const tileSize = (Math.min(containerWidth, containerHeight) - gap * 5) / 4;
+    
+    // Hitung offset untuk posisi tengah
+    const offsetX = (containerWidth - (tileSize * 4 + gap * 5)) / 2;
+    const offsetY = (containerHeight - (tileSize * 4 + gap * 5)) / 2;
+    
+    for (let r = 0; r < 4; r++) {
+      for (let c = 0; c < 4; c++) {
+        if (grid[r][c]) {
+          const tile = document.createElement('div');
+          const value = grid[r][c];
+          tile.className = `tile tile-${value}`;
+          tile.textContent = value;
+          tile.style.width = `${tileSize}px`;
+          tile.style.height = `${tileSize}px`;
+          
+          // Perhitungan posisi yang lebih akurat
+          tile.style.left = `${offsetX + c * (tileSize + gap) + gap}px`;
+          tile.style.top = `${offsetY + r * (tileSize + gap) + gap}px`;
+          
+          // Adjust font size for large numbers
+          if (value >= 128) {
+            tile.style.fontSize = `${Math.max(12, tileSize/3)}px`;
+          }
+          
+          gridContainer.appendChild(tile);
+        }
+      }
+    }
+    updateScore();
+  }
     // Data
     let grid = [], score = 0, bestScore = localStorage.getItem('bestScore') || 0, gameActive = true;
     const gridElement = document.getElementById('grid'),
