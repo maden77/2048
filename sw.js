@@ -2,6 +2,8 @@ const CACHE_NAME = '2048-cache-v1';
 const urlsToCache = [
   './',
   './index.html',
+  './classic.html',
+  './tertis.html',
   './manifest.json',
   './sw.js',
   './icon2048-72x72.png',
