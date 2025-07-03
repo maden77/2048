@@ -72,11 +72,11 @@
       .grid-container { 
     background: #bbada0; 
     border-radius: 6px; 
-    padding: 15px; 
+    padding: 0; 
     position: relative; 
     aspect-ratio: 1/1; 
     touch-action: none;
-    width: calc(100% - 30px); /* Memastikan lebar sesuai */
+    width: 100%
     margin: 0 auto; /* Pusatkan grid */
     flex-grow: 1;
     overflow: hidden; /* Mencegah tile keluar dari container */
@@ -97,7 +97,9 @@
       display: grid; 
       grid-template-columns: repeat(4, 1fr); 
       gap: 15px; 
-      height: 100%; 
+      width:calc(100% - 30px);
+      height: calc(100% - 30px);
+      position:absolute;
     }
     
     .cell { 
