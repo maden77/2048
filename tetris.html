@@ -13,7 +13,7 @@
       align-items: center;
       margin: 0;
       padding: 20px;
-      height: 100%;
+      height: 100vh;
       box-sizing: border-box;
     }
     h1 {
@@ -104,9 +104,9 @@
     const finalScoreElement = document.getElementById('final-score');
     
     // Pengaturan game
-    const cols = 8;
+    const cols = 4;
     const rows = 8;
-    const size = 40;
+    const size = 50;
     let papan = Array(rows).fill().map(() => Array(cols).fill(0));
     let potonganSekarang = null;
     let skor = 0;
